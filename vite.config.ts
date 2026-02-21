@@ -7,7 +7,8 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, '.', '');
 
   return {
-    base: '/KD/',   // ← مهم جداً ل GitHub Pages
+    // IMPORTANT for GitHub Pages (repo name = KD)
+    base: mode === 'production' ? '/KD/' : '/',
 
     plugins: [react(), tailwindcss()],
 
