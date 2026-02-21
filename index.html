@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="sv">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>JavaScript-programmering</title>
+    <link rel="stylesheet" href="/src/style.css">
+    <!-- Preload fonts if needed, using system fonts for performance -->
+  </head>
+  <body>
+    <div id="app">
+      <header>
+        <div class="logo-section">
+          <div class="logo-icon">JS</div>
+          <h1>JavaScript-programmering</h1>
+        </div>
+      </header>
+
+      <main>
+        <div class="editor-panel">
+          <div class="toolbar">
+            <div class="toolbar-group">
+              <button id="btn-run" class="tb-btn tb-btn--primary btn-run">
+                <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                Kör kod
+              </button>
+            </div>
+            
+            <div class="toolbar-divider"></div>
+
+            <div class="toolbar-group">
+              <button id="btn-undo" class="tb-btn tb-btn--icon" title="Ångra" aria-label="Ångra">
+                <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"></path><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"></path></svg>
+              </button>
+              <button id="btn-redo" class="tb-btn tb-btn--icon" title="Gör om" aria-label="Gör om">
+                <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M21 7v6h-6"></path><path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3L21 13"></path></svg>
+              </button>
+            </div>
+
+            <div class="toolbar-divider"></div>
+
+            <div class="toolbar-group">
+              <button id="btn-copy" class="tb-btn tb-btn--icon" title="Kopiera kod" aria-label="Kopiera kod">
+                <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+              </button>
+              <button id="btn-save" class="tb-btn tb-btn--icon" title="Spara kod" aria-label="Spara kod">
+                <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+              </button>
+              <button id="btn-load" class="tb-btn tb-btn--icon" title="Ladda kod" aria-label="Ladda kod">
+                <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+              </button>
+              <button id="btn-share" class="tb-btn tb-btn--icon" title="Skapa länk" aria-label="Skapa länk">
+                <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+              </button>
+              <button id="btn-screenshot" class="tb-btn tb-btn--icon" title="Ta bild" aria-label="Ta bild">
+                <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+              </button>
+              <button id="theme-toggle" class="tb-btn tb-btn--icon" title="Växla mörkt/ljust läge" aria-label="Växla tema">
+                <svg class="icon-sun" viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+                <svg class="icon-moon" viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="display:none;"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+              </button>
+              <input type="file" id="file-input" accept=".js,.txt" style="display: none;">
+            </div>
+
+            <div class="toolbar-spacer"></div>
+          </div>
+
+          <!-- Share Modal -->
+          <div id="share-modal" class="modal-overlay" style="display: none;">
+            <div class="modal">
+              <div class="modal-header">
+                <h3>Dela din kod</h3>
+                <button id="btn-close-modal" class="close-btn">&times;</button>
+              </div>
+              <div class="modal-body">
+                <p>Här är din länk:</p>
+                <div class="link-container">
+                  <input type="text" id="share-link" readonly>
+                  <button id="btn-copy-link">Kopiera</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="color-tools">
+            <div class="color-picker-wrapper">
+              <input type="color" id="color-input" value="#ff0000">
+              <input type="text" id="color-hex" value="#ff0000" readonly>
+            </div>
+            <button id="btn-copy-hex">Kopiera HEX</button>
+            <button id="btn-insert-hex">Sätt in i koden</button>
+          </div>
+
+          <div class="editor-container">
+            <div class="line-numbers" id="line-numbers">1</div>
+            <div class="code-wrapper">
+              <pre id="highlighting" aria-hidden="true"><code id="highlighting-content"></code></pre>
+              <textarea id="code-editor" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off"></textarea>
+            </div>
+          </div>
+
+          <div class="error-panel">
+            <div class="panel-header">Felmeddelanden</div>
+            <div id="error-output" class="error-content">Inga fel.</div>
+          </div>
+        </div>
+
+        <div id="splitter" class="splitter"></div>
+
+        <div class="canvas-panel">
+          <div class="canvas-grid-container">
+            <div class="axis-corner"></div>
+            <div id="x-axis-container" class="axis-container x-axis"></div>
+            <div id="y-axis-container" class="axis-container y-axis"></div>
+            <div class="canvas-wrapper">
+              <canvas id="drawing-canvas"></canvas>
+              <div id="coords-tooltip" class="coords-tooltip" style="display: none;">Koordinater: x: 0, y: 0</div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+    <script type="module" src="/src/script.js"></script>
+  </body>
+</html>
