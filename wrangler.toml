@@ -4,5 +4,5 @@ compatibility_date = "2024-01-01"
 
 [[kv_namespaces]]
 binding = "CODE_KV"
-id = "YOUR_KV_ID_HERE"
-preview_id = "YOUR_PREVIEW_KV_ID_HERE"
+id = "0598237b62ed439a919e37150a3c066a"
+preview_id = "fe8f6b3a718d4d14b081d3576597ea27"

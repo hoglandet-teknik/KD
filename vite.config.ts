@@ -7,8 +7,8 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, '.', '');
 
   return {
-    // IMPORTANT for GitHub Pages project site: https://<org>.github.io/KD/
-    base: mode === 'production' ? '/KD/' : '/',
+    // مهم لـ GitHub Pages: اسم الريبو هو KD
+    base: '/KD/',
 
     plugins: [react(), tailwindcss()],
     define: {
@@ -20,8 +20,6 @@ export default defineConfig(({ mode }) => {
       },
     },
     server: {
-      // HMR is disabled in AI Studio via DISABLE_HMR env var.
-      // Do not modify—file watching is disabled to prevent flickering during agent edits.
       hmr: process.env.DISABLE_HMR !== 'true',
     },
   };

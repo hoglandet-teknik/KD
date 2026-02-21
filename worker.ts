@@ -1,83 +1,48 @@
-interface Env {
-  CODE_KV: KVNamespace;
+// worker.ts (add this CORS helper + use it in your /api/share routes)
+
+const CORS_HEADERS: Record<string, string> = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type",
+  "Access-Control-Max-Age": "86400",
+};
+
+function corsHeaders(origin: string | null) {
+  // اسمح فقط لأصولك (عدّلها إذا احتجت)
+  const allowed = new Set([
+    "http://localhost:3000",
+    "https://hoglandet-teknik.github.io",
+  ]);
+
+  const o = origin && allowed.has(origin) ? origin : "https://hoglandet-teknik.github.io";
+
+  return {
+    "Access-Control-Allow-Origin": o,
+    "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type",
+    "Access-Control-Max-Age": "86400",
+  };
 }
 
 export default {
-  async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
-    const url = new URL(request.url);
-    const path = url.pathname;
-    const method = request.method;
+  async fetch(request: Request, env: any): Promise<Response> {
+    const origin = request.headers.get("Origin");
 
-    // CORS headers
-    const corsHeaders = {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type',
-    };
-
-    if (method === 'OPTIONS') {
-      return new Response(null, { headers: corsHeaders });
+    // Preflight
+    if (request.method === "OPTIONS") {
+      return new Response(null, { headers: corsHeaders(origin) });
     }
 
-    if (path === '/api/share') {
-      if (method === 'POST') {
-        try {
-          const body = await request.json() as { code?: string };
-          const code = body.code;
+    // ... منطق API حقك هنا (GET/POST)
+    // وبعد ما تبني response:
+    const res = new Response(JSON.stringify({ ok: true }), {
+      headers: { "Content-Type": "application/json" },
+    });
 
-          if (!code || typeof code !== 'string' || code.trim() === '') {
-            return new Response(JSON.stringify({ error: 'Invalid code' }), {
-              status: 400,
-              headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-            });
-          }
+    // ألحق CORS headers على أي رد
+    const h = new Headers(res.headers);
+    for (const [k, v] of Object.entries(corsHeaders(origin))) h.set(k, v);
 
-          // Max size 50 KB
-          if (new TextEncoder().encode(code).length > 50 * 1024) {
-            return new Response(JSON.stringify({ error: 'Code too large (max 50KB)' }), {
-              status: 413,
-              headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-            });
-          }
-
-          // Generate short ID (8 chars)
-          const id = crypto.randomUUID().substring(0, 8);
-
-          // Store in KV (TTL 90 days)
-          await env.CODE_KV.put(`code:${id}`, code, { expirationTtl: 90 * 24 * 60 * 60 });
-
-          return new Response(JSON.stringify({ id }), {
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-          });
-        } catch (e) {
-          return new Response(JSON.stringify({ error: 'Internal Server Error' }), {
-            status: 500,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-          });
-        }
-      } else if (method === 'GET') {
-        const id = url.searchParams.get('id');
-        if (!id) {
-          return new Response(JSON.stringify({ error: 'Missing id' }), {
-            status: 400,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-          });
-        }
-
-        const code = await env.CODE_KV.get(`code:${id}`);
-        if (!code) {
-          return new Response(JSON.stringify({ error: 'not_found' }), {
-            status: 404,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-          });
-        }
-
-        return new Response(JSON.stringify({ code }), {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        });
-      }
-    }
-
-    return new Response('Not Found', { status: 404, headers: corsHeaders });
-  }
+    return new Response(res.body, { status: res.status, headers: h });
+  },
 };
