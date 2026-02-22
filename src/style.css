@@ -638,18 +638,7 @@ canvas {
   }
 }
 
-/* 2) Better caret/click behavior on iPad:
-      iOS sometimes misplaces caret when textarea text is transparent.
-      On touch devices: disable highlighting overlay and show real text. */
-@media (pointer: coarse) {
-  #highlighting { display: none !important; }
 
-  #code-editor {
-    color: var(--text-color) !important;
-    -webkit-text-fill-color: var(--text-color) !important;
-    background: transparent !important;
-  }
-}
 
 /* 3) iPad canvas target 600x600 WITHOUT affecting desktop.
       Your grid has axes: 40px left + 30px top, so total target = 640 x 630 */
@@ -666,3 +655,51 @@ canvas {
 .token-string   { color: #16a34a !important; }                  /* green */
 .token-comment  { color: #94a3b8 !important; font-style: italic; }
 .token-keyword  { color: #db2777 !important; font-weight: 700; } /* magenta */
+
+
+/* =========================================================
+   iPad SAFE PATCH (no desktop changes)
+   - Keep syntax highlighting overlay ON
+   - Fix caret/tap behavior on iPad Safari
+   - Slightly reduce header + error panel to fit iPad
+   ========================================================= */
+
+/* iPad / touch devices only */
+@media (pointer: coarse) and (max-width: 1024px) {
+  /* 1) Ensure highlighting layer is visible on iPad */
+  #highlighting {
+    display: block !important;
+  }
+
+  /* 2) iOS caret/tap fix:
+        If textarea text is fully transparent, iOS Safari can misplace caret.
+        Use "almost transparent" text instead of fully transparent. */
+  #code-editor {
+    color: rgba(0, 0, 0, 0.001) !important;
+    -webkit-text-fill-color: rgba(0, 0, 0, 0.001) !important;
+    caret-color: var(--text-color) !important;
+  }
+
+  /* 3) Fit layout slightly better on iPad */
+  header {
+    height: 52px !important;
+    padding: 0 14px !important;
+  }
+
+  .error-panel {
+    height: 92px !important;
+  }
+
+  /* Optional: reduce editor padding a touch (safe) */
+  #code-editor,
+  #highlighting {
+    padding: 8px !important;
+  }
+
+  /* Keep your iPad canvas target if you already set it:
+     axes are 40px left + 30px top, so total = 640 x 630 */
+  .canvas-grid-container {
+    width: min(640px, 100%) !important;
+    height: min(630px, 100%) !important;
+  }
+}
