@@ -73,6 +73,11 @@ const btnCopyLink = document.getElementById('btn-copy-link') as HTMLButtonElemen
 const splitter = document.getElementById('splitter') as HTMLElement | null;
 const mainContainer = document.querySelector('main') as HTMLElement | null;
 
+// NEW: Help modal elements
+const btnHelp = document.getElementById('btn-help') as HTMLButtonElement | null;
+const helpModal = document.getElementById('help-modal') as HTMLElement | null;
+const btnCloseHelp = document.getElementById('btn-close-help') as HTMLButtonElement | null;
+
 // Initialization
 function init() {
   if (
@@ -106,7 +111,10 @@ function init() {
     !shareLinkInput ||
     !btnCopyLink ||
     !splitter ||
-    !mainContainer
+    !mainContainer ||
+    !btnHelp ||
+    !helpModal ||
+    !btnCloseHelp
   ) {
     console.error('Missing required DOM elements.');
     return;
@@ -222,6 +230,13 @@ function init() {
   // Close modal on outside click
   shareModal.addEventListener('click', (e) => {
     if (e.target === shareModal) shareModal.style.display = 'none';
+  });
+
+  // NEW: Help modal open/close
+  btnHelp.addEventListener('click', () => (helpModal.style.display = 'flex'));
+  btnCloseHelp.addEventListener('click', () => (helpModal.style.display = 'none'));
+  helpModal.addEventListener('click', (e) => {
+    if (e.target === helpModal) helpModal.style.display = 'none';
   });
 
   themeToggle.addEventListener('click', toggleTheme);
@@ -400,43 +415,82 @@ async function loadSharedCode(id: string) {
 function updateHighlighting(text: string) {
   if (!highlightingContent) return;
 
-  const tokenRegex =
-    /(\/\/.*)|(".*?"|'.*?')|(\b(circle|rectangle|triangle|arc|line|ring|text|clear|fill|Math|console)\b)|(\b(var|let|const|function|if|else|for|while|return|true|false|null|undefined)\b)|(\b\d+\b)/g;
+  const safeText = text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
 
-  const lines = text.split('\n');
-  const htmlLines = lines.map((line, index) => {
-    let htmlLine = line.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-
-    htmlLine = htmlLine.replace(tokenRegex, (match, comment, string, func, _funcName, keyword, _keywordName, number) => {
-      if (comment) return `<span class="token-comment">${comment}</span>`;
-      if (string) return `<span class="token-string">${string}</span>`;
-      if (func) return `<span class="token-function">${func}</span>`;
-      if (keyword) return `<span class="token-keyword">${keyword}</span>`;
-      if (number) return `<span class="token-number">${number}</span>`;
+  const highlighted = safeText.replace(
+    /(\/\/.*)|(".*?"|'.*?')|(\b(circle|rectangle|triangle|arc|arcUp|arcDownLeft|arcUpLeft|line|ring|text|clear|fill|Math|console)\b)|(\b(var|let|const|function|if|else|for|while|return|true|false|null|undefined)\b)|(\b\d+\b)/g,
+    (match, comment, string, func, keyword, number) => {
+      if (comment) return `<span class="token-comment">${match}</span>`;
+      if (string) return `<span class="token-string">${match}</span>`;
+      if (func) return `<span class="token-function">${match}</span>`;
+      if (keyword) return `<span class="token-keyword">${match}</span>`;
+      if (number) return `<span class="token-number">${match}</span>`;
       return match;
-    });
+    }
+  );
 
-    if (index === activeErrorLine) return `<span class="line-error">${htmlLine || ' '}</span>`;
-    return htmlLine;
-  });
+  const lines = highlighted.split('\n');
 
-  let html = htmlLines.join('\n');
-  if (text.endsWith('\n')) html += ' ';
-  highlightingContent.innerHTML = html;
+  const withLineError = lines
+    .map((line, idx) => {
+      if (idx === activeErrorLine) {
+        return `<span class="line-error">${line || '&nbsp;'}</span>`;
+      }
+      return line || '&nbsp;';
+    })
+    .join('\n');
+
+  highlightingContent.innerHTML = withLineError;
 }
 
-// Save history on blur
-if (codeEditor) {
-  codeEditor.addEventListener('blur', () => saveToHistory(code));
+function updateLineNumbers() {
+  if (!lineNumbers || !codeEditor) return;
+  const lines = codeEditor.value.split('\n').length;
+  lineNumbers.innerHTML = Array.from({ length: lines }, (_, i) => i + 1).join('<br>');
+}
+
+function syncScroll() {
+  if (!codeEditor || !highlighting || !lineNumbers) return;
+  highlighting.scrollTop = codeEditor.scrollTop;
+  highlighting.scrollLeft = codeEditor.scrollLeft;
+  lineNumbers.scrollTop = codeEditor.scrollTop;
+}
+
+function handleKeydown(e: KeyboardEvent) {
+  if (!codeEditor) return;
+
+  // Tab indentation
+  if (e.key === 'Tab') {
+    e.preventDefault();
+    const start = codeEditor.selectionStart;
+    const end = codeEditor.selectionEnd;
+    const before = codeEditor.value.substring(0, start);
+    const after = codeEditor.value.substring(end);
+    codeEditor.value = before + '  ' + after;
+    codeEditor.selectionStart = codeEditor.selectionEnd = start + 2;
+    handleInput();
+  }
+
+  // Ctrl+Z / Ctrl+Y
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
+    e.preventDefault();
+    undo();
+  }
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y') {
+    e.preventDefault();
+    redo();
+  }
 }
 
 function saveToHistory(newCode: string) {
-  if (history[historyIndex] !== newCode) {
+  if (historyIndex < history.length - 1) {
     history = history.slice(0, historyIndex + 1);
-    history.push(newCode);
-    historyIndex = history.length - 1;
-    updateUndoRedoButtons();
   }
+  history.push(newCode);
+  historyIndex = history.length - 1;
 }
 
 function undo() {
@@ -445,11 +499,9 @@ function undo() {
     historyIndex--;
     code = history[historyIndex];
     codeEditor.value = code;
-    activeErrorLine = -1;
     updateHighlighting(code);
     updateLineNumbers();
-    updateUndoRedoButtons();
-    localStorage.setItem('studentCode', code);
+    debouncedSave();
   }
 }
 
@@ -459,206 +511,82 @@ function redo() {
     historyIndex++;
     code = history[historyIndex];
     codeEditor.value = code;
-    activeErrorLine = -1;
     updateHighlighting(code);
     updateLineNumbers();
-    updateUndoRedoButtons();
-    localStorage.setItem('studentCode', code);
+    debouncedSave();
   }
 }
 
-function updateUndoRedoButtons() {
-  if (!btnUndo || !btnRedo) return;
-  btnUndo.disabled = historyIndex <= 0;
-  btnRedo.disabled = historyIndex >= history.length - 1;
-}
-
-function updateLineNumbers() {
-  if (!lineNumbers) return;
-  const lines = code.split('\n').length;
-  lineNumbers.innerHTML = Array(lines)
-    .fill(0)
-    .map((_, i) => i + 1)
-    .join('<br>');
-}
-
-function syncScroll() {
-  if (!codeEditor || !lineNumbers || !highlighting) return;
-
-  const scrollTop = codeEditor.scrollTop;
-  const scrollLeft = codeEditor.scrollLeft;
-
-  lineNumbers.scrollTop = scrollTop;
-  highlighting.scrollTop = scrollTop;
-  highlighting.scrollLeft = scrollLeft;
-}
-
-function handleKeydown(e: KeyboardEvent) {
+function copyCode() {
   if (!codeEditor) return;
-
-  if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
-    e.preventDefault();
-    e.shiftKey ? redo() : undo();
-  } else if ((e.ctrlKey || e.metaKey) && e.key === 'y') {
-    e.preventDefault();
-    redo();
-  }
-
-  if (e.key === 'Tab') {
-    e.preventDefault();
-    insertAtCursor('  ');
-  }
+  navigator.clipboard.writeText(codeEditor.value);
 }
 
 function insertAtCursor(text: string) {
   if (!codeEditor) return;
-
   const start = codeEditor.selectionStart;
   const end = codeEditor.selectionEnd;
-
-  code = code.substring(0, start) + text + code.substring(end);
-  codeEditor.value = code;
-
-  activeErrorLine = -1;
-  updateHighlighting(code);
-
+  const before = codeEditor.value.substring(0, start);
+  const after = codeEditor.value.substring(end);
+  codeEditor.value = before + text + after;
   codeEditor.selectionStart = codeEditor.selectionEnd = start + text.length;
-  codeEditor.focus();
-
-  saveToHistory(code);
-  localStorage.setItem('studentCode', code);
-}
-
-async function copyCode() {
-  try {
-    await navigator.clipboard.writeText(code);
-  } catch (err) {
-    console.error('Failed to copy', err);
-  }
+  handleInput();
 }
 
 function saveToFile() {
-  const blob = new Blob([code], { type: 'text/javascript' });
+  if (!codeEditor) return;
+  const blob = new Blob([codeEditor.value], { type: 'text/plain' });
   const url = URL.createObjectURL(blob);
-
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'min-kod.js';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'kod.js';
+  link.click();
   URL.revokeObjectURL(url);
 }
 
 function loadFromFile(e: Event) {
-  if (!codeEditor || !fileInput) return;
-
-  const t = e.target as HTMLInputElement;
-  const file = t.files?.[0];
+  if (!codeEditor) return;
+  const input = e.target as HTMLInputElement;
+  const file = input.files?.[0];
   if (!file) return;
 
   const reader = new FileReader();
-  reader.onload = (ev) => {
-    const result = (ev.target as FileReader)?.result;
-    if (typeof result === 'string') {
-      code = result;
-      codeEditor.value = code;
-      activeErrorLine = -1;
-      updateHighlighting(code);
-      updateLineNumbers();
-      saveToHistory(code);
-      localStorage.setItem('studentCode', code);
-      fileInput.value = '';
-    }
+  reader.onload = () => {
+    code = String(reader.result || '');
+    codeEditor.value = code;
+    updateHighlighting(code);
+    updateLineNumbers();
+    saveToHistory(code);
+    debouncedSave();
+    runCode();
   };
   reader.readAsText(file);
 }
 
-function toggleTheme() {
-  isDarkMode = !isDarkMode;
-  if (isDarkMode) {
-    document.documentElement.classList.add('dark');
-    const sun = document.querySelector('.icon-sun') as HTMLElement | null;
-    const moon = document.querySelector('.icon-moon') as HTMLElement | null;
-    if (sun) sun.style.display = 'none';
-    if (moon) moon.style.display = 'block';
-  } else {
-    document.documentElement.classList.remove('dark');
-    const sun = document.querySelector('.icon-sun') as HTMLElement | null;
-    const moon = document.querySelector('.icon-moon') as HTMLElement | null;
-    if (sun) sun.style.display = 'block';
-    if (moon) moon.style.display = 'none';
-  }
-}
-
-// Canvas & Execution Logic
-function renderAxes() {
-  if (!xAxisContainer || !yAxisContainer || !canvas) return;
-
-  xAxisContainer.innerHTML = '';
-  yAxisContainer.innerHTML = '';
-
-  const xTitle = document.createElement('div');
-  xTitle.className = 'axis-title axis-title-x';
-  xTitle.textContent = 'X-Axis';
-  xAxisContainer.appendChild(xTitle);
-
-  const yTitle = document.createElement('div');
-  yTitle.className = 'axis-title axis-title-y';
-  yTitle.textContent = 'Y-Axis';
-  yAxisContainer.appendChild(yTitle);
-
-  const width = canvas.clientWidth;
-  const height = canvas.clientHeight;
-  const step = 50;
-
-  for (let x = 0; x <= width; x += step) {
-    if (x === 0) continue;
-
-    const label = document.createElement('div');
-    label.className = 'axis-label x-label';
-    label.textContent = String(x);
-    label.style.left = x + 'px';
-    xAxisContainer.appendChild(label);
-
-    const tick = document.createElement('div');
-    tick.className = 'axis-tick x-tick';
-    tick.style.left = x + 'px';
-    xAxisContainer.appendChild(tick);
-  }
-
-  for (let y = 0; y <= height; y += step) {
-    if (y === 0) continue;
-
-    const label = document.createElement('div');
-    label.className = 'axis-label y-label';
-    label.textContent = String(y);
-    label.style.top = y + 'px';
-    yAxisContainer.appendChild(label);
-
-    const tick = document.createElement('div');
-    tick.className = 'axis-tick y-tick';
-    tick.style.top = y + 'px';
-    yAxisContainer.appendChild(tick);
-  }
+function takeScreenshot() {
+  if (!canvas) return;
+  const link = document.createElement('a');
+  link.download = 'canvas.png';
+  link.href = canvas.toDataURL('image/png');
+  link.click();
 }
 
 function clearCanvas() {
   if (!ctx || !canvas) return;
-  // Clear safely in device pixels
   ctx.save();
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.restore();
 }
 
-function takeScreenshot() {
-  if (!canvas) return;
-  const link = document.createElement('a');
-  link.download = `canvas-${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.png`;
-  link.href = canvas.toDataURL('image/png');
-  link.click();
+// NEW: helper to draw arcs with explicit start/end angles
+function drawArc(x: number, y: number, r: number, startRad: number, endRad: number, t: number, c: string, anticlockwise?: boolean) {
+  if (!ctx) return;
+  ctx.beginPath();
+  ctx.arc(x, y, r, startRad, endRad, anticlockwise);
+  ctx.lineWidth = t;
+  ctx.strokeStyle = c;
+  ctx.stroke();
 }
 
 function runCode() {
@@ -742,14 +670,34 @@ function runCode() {
       ctx.lineCap = 'round';
       ctx.stroke();
     },
+
+    // arc(...) stays as-is: start at right, go clockwise => "down" (smile) for 180°
     arc: (x: number, y: number, r: number, deg: number, t: number, c: string) => {
-      ctx.beginPath();
       const rad = (deg * Math.PI) / 180;
-      ctx.arc(x, y, r, 0, rad);
-      ctx.lineWidth = t;
-      ctx.strokeStyle = c;
-      ctx.stroke();
+      drawArc(x, y, r, 0, rad, t, c, false);
     },
+
+    // NEW #1: arcUp(...) start at right, go counterclockwise => "up" (cup) for 180°
+    arcUp: (x: number, y: number, r: number, deg: number, t: number, c: string) => {
+      const rad = (deg * Math.PI) / 180;
+      // from 0 to -rad, anticlockwise so it draws upward
+      drawArc(x, y, r, 0, -rad, t, c, true);
+    },
+
+    // NEW #2: arcDownLeft(...) start at left, go clockwise => "down" (smile) left->right for 180°
+    arcDownLeft: (x: number, y: number, r: number, deg: number, t: number, c: string) => {
+      const rad = (deg * Math.PI) / 180;
+      // start at PI (left), sweep to PI+rad
+      drawArc(x, y, r, Math.PI, Math.PI + rad, t, c, false);
+    },
+
+    // NEW #3: arcUpLeft(...) start at left, go counterclockwise => "up" left->right for 180°
+    arcUpLeft: (x: number, y: number, r: number, deg: number, t: number, c: string) => {
+      const rad = (deg * Math.PI) / 180;
+      // start at PI (left), sweep to PI-rad anticlockwise (up)
+      drawArc(x, y, r, Math.PI, Math.PI - rad, t, c, true);
+    },
+
     text: (x: number, y: number, s: number, str: string, c: string) => {
       ctx.font = `${s}px Inter, sans-serif`;
       ctx.fillStyle = c;
@@ -821,18 +769,108 @@ function levenshtein(a: string, b: string) {
 
   for (let i = 1; i <= b.length; i++) {
     for (let j = 1; j <= a.length; j++) {
-      if (b.charAt(i - 1) === a.charAt(j - 1)) {
-        matrix[i][j] = matrix[i - 1][j - 1];
-      } else {
-        matrix[i][j] = Math.min(
-          matrix[i - 1][j - 1] + 1,
-          Math.min(matrix[i][j - 1] + 1, matrix[i - 1][j] + 1)
-        );
-      }
+      if (b.charAt(i - 1) === a.charAt(j - 1)) matrix[i][j] = matrix[i - 1][j - 1];
+      else matrix[i][j] = Math.min(matrix[i - 1][j - 1] + 1, Math.min(matrix[i][j - 1] + 1, matrix[i - 1][j] + 1));
     }
   }
+
   return matrix[b.length][a.length];
 }
 
-// Start
-init();
+// Suggest similar function name if student wrote wrong one
+function suggestFunctionName(name: string): string | null {
+  const functions = ['circle', 'rectangle', 'triangle', 'arc', 'arcUp', 'arcDownLeft', 'arcUpLeft', 'line', 'ring', 'text', 'clear', 'fill'];
+  let best: { fn: string; dist: number } | null = null;
+
+  for (const fn of functions) {
+    const dist = levenshtein(name, fn);
+    if (!best || dist < best.dist) best = { fn, dist };
+  }
+
+  if (!best) return null;
+  return best.dist <= 3 ? best.fn : null;
+}
+
+function toggleTheme() {
+  isDarkMode = !isDarkMode;
+  document.body.classList.toggle('dark', isDarkMode);
+
+  // Update theme icon
+  const sun = document.querySelector('.icon-sun') as HTMLElement | null;
+  const moon = document.querySelector('.icon-moon') as HTMLElement | null;
+  if (sun && moon) {
+    if (isDarkMode) {
+      sun.style.display = 'none';
+      moon.style.display = 'block';
+    } else {
+      sun.style.display = 'block';
+      moon.style.display = 'none';
+    }
+  }
+
+  localStorage.setItem('isDarkMode', String(isDarkMode));
+}
+
+// Axis rendering (unchanged)
+function renderAxes() {
+  if (!canvasWrapper || !xAxisContainer || !yAxisContainer) return;
+
+  xAxisContainer.innerHTML = '';
+  yAxisContainer.innerHTML = '';
+
+  const rect = canvasWrapper.getBoundingClientRect();
+  const width = Math.floor(rect.width);
+  const height = Math.floor(rect.height);
+
+  const step = 50;
+
+  // X labels + ticks
+  for (let x = step; x <= width; x += step) {
+    const label = document.createElement('div');
+    label.className = 'axis-label x-label';
+    label.style.left = `${x}px`;
+    label.textContent = `${x}`;
+    xAxisContainer.appendChild(label);
+
+    const tick = document.createElement('div');
+    tick.className = 'axis-tick x-tick';
+    tick.style.left = `${x}px`;
+    xAxisContainer.appendChild(tick);
+  }
+
+  // Y labels + ticks
+  for (let y = step; y <= height; y += step) {
+    const label = document.createElement('div');
+    label.className = 'axis-label y-label';
+    label.style.top = `${y}px`;
+    label.textContent = `${y}`;
+    yAxisContainer.appendChild(label);
+
+    const tick = document.createElement('div');
+    tick.className = 'axis-tick y-tick';
+    tick.style.top = `${y}px`;
+    yAxisContainer.appendChild(tick);
+  }
+}
+
+// Boot
+(function boot() {
+  try {
+    const savedTheme = localStorage.getItem('isDarkMode');
+    if (savedTheme === 'true') {
+      isDarkMode = true;
+      document.body.classList.add('dark');
+
+      const sun = document.querySelector('.icon-sun') as HTMLElement | null;
+      const moon = document.querySelector('.icon-moon') as HTMLElement | null;
+      if (sun && moon) {
+        sun.style.display = 'none';
+        moon.style.display = 'block';
+      }
+    }
+  } catch {
+    // ignore
+  }
+
+  init();
+})();

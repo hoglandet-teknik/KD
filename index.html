@@ -59,7 +59,7 @@
                 <svg class="icon-sun" viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
                 <svg class="icon-moon" viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="display:none;"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
               </button>
-              <input type="file" id="file-input" accept=".js,.txt" style="display: none;">
+              <input type="file" id="file-input" accept=".js,txt" style="display: none;">
             </div>
 
             <div class="toolbar-spacer"></div>
@@ -82,6 +82,92 @@
             </div>
           </div>
 
+          <!-- Help / Commands Modal -->
+          <div id="help-modal" class="modal-overlay" style="display: none;">
+            <div class="modal modal--help">
+              <div class="modal-header">
+                <h3>Kommandon</h3>
+                <button id="btn-close-help" class="close-btn">&times;</button>
+              </div>
+              <div class="modal-body">
+                <p class="help-intro">Här är kommandon du kan använda i editor:</p>
+
+                <div class="help-list">
+                  <div class="help-row">
+                    <div class="help-sig"><code>fill("färg");</code></div>
+                    <div class="help-desc">Fyll hela canvas med en färg.</div>
+                  </div>
+
+                  <div class="help-row">
+                    <div class="help-sig"><code>circle(x, y, radie, "färg");</code></div>
+                    <div class="help-desc">Ritar en fylld cirkel.</div>
+                  </div>
+
+                  <div class="help-row">
+                    <div class="help-sig"><code>rectangle(x, y, bredd, höjd, "färg");</code></div>
+                    <div class="help-desc">Ritar en rektangel.</div>
+                  </div>
+
+                  <div class="help-row">
+                    <div class="help-sig"><code>triangle(x1, y1, x2, y2, x3, y3, "färg");</code></div>
+                    <div class="help-desc">Ritar en triangel.</div>
+                  </div>
+
+                  <div class="help-row help-row--arc">
+                    <div class="help-sig"><code>arc(x, y, radie, vinkel, tjocklek, "färg");</code></div>
+                    <div class="help-desc">
+                      Båge (start: höger → vänster, neråt).
+                      <span class="arc-mini arc-mini--down-rl" aria-hidden="true"></span>
+                    </div>
+                  </div>
+
+                  <div class="help-row help-row--arc">
+                    <div class="help-sig"><code>arcUp(x, y, radie, vinkel, tjocklek, "färg");</code></div>
+                    <div class="help-desc">
+                      Båge (start: höger → vänster, uppåt).
+                      <span class="arc-mini arc-mini--up-rl" aria-hidden="true"></span>
+                    </div>
+                  </div>
+
+                  <div class="help-row help-row--arc">
+                    <div class="help-sig"><code>arcDownLeft(x, y, radie, vinkel, tjocklek, "färg");</code></div>
+                    <div class="help-desc">
+                      Båge (start: vänster → höger, neråt).
+                      <span class="arc-mini arc-mini--down-lr" aria-hidden="true"></span>
+                    </div>
+                  </div>
+
+                  <div class="help-row help-row--arc">
+                    <div class="help-sig"><code>arcUpLeft(x, y, radie, vinkel, tjocklek, "färg");</code></div>
+                    <div class="help-desc">
+                      Båge (start: vänster → höger, uppåt).
+                      <span class="arc-mini arc-mini--up-lr" aria-hidden="true"></span>
+                    </div>
+                  </div>
+
+                  <div class="help-row">
+                    <div class="help-sig"><code>line(x1, y1, x2, y2, tjocklek, "färg");</code></div>
+                    <div class="help-desc">Ritar en linje.</div>
+                  </div>
+
+                  <div class="help-row">
+                    <div class="help-sig"><code>ring(x, y, radie, tjocklek, "färg");</code></div>
+                    <div class="help-desc">Ritar en ring (cirkel-linje).</div>
+                  </div>
+
+                  <div class="help-row">
+                    <div class="help-sig"><code>text(x, y, storlek, "Text Sträng", "färg");</code></div>
+                    <div class="help-desc">Skriver text.</div>
+                  </div>
+                </div>
+
+                <div class="help-note">
+                  Tips: <code>vinkel</code> är i grader (t.ex. 180 för en halvcirkel).
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div class="color-tools">
             <div class="color-picker-wrapper">
               <input type="color" id="color-input" value="#ff0000">
@@ -89,6 +175,12 @@
             </div>
             <button id="btn-copy-hex">Kopiera HEX</button>
             <button id="btn-insert-hex">Sätt in i koden</button>
+
+            <!-- NEW: Commands button -->
+            <button id="btn-help" class="btn-help" title="Kommandon" aria-label="Kommandon">
+              <span class="btn-help__icon">?</span>
+              Kommandon
+            </button>
           </div>
 
           <div class="editor-container">

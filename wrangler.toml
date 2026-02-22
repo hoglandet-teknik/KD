@@ -1,4 +1,4 @@
-name = "share-api"
+name = "koda-worker"
 main = "worker.ts"
 compatibility_date = "2024-01-01"
 
