@@ -2,7 +2,7 @@
   --bg-color: #f9fafb;
   --panel-bg: #ffffff;
   --text-color: #1f2937;
-  --border-color: #e5e7eb;
+  --border-color: #e0dee0;
   --toolbar-bg: #f3f4f6;
   --accent-color: #4f46e5;
   --accent-hover: #4338ca;
@@ -698,6 +698,33 @@ canvas {
 
   /* Keep your iPad canvas target if you already set it:
      axes are 40px left + 30px top, so total = 640 x 630 */
+  .canvas-grid-container {
+    width: min(640px, 100%) !important;
+    height: min(630px, 100%) !important;
+  }
+}
+
+/* =========================================================
+   iPad-only layout tuning (NO desktop impact)
+   ========================================================= */
+@media (pointer: coarse) and (max-width: 1024px) {
+
+  /* Improve iOS editor tap/caret behavior */
+  #code-editor, #highlighting {
+    font-size: 16px !important;
+    line-height: 1.5 !important;
+  }
+
+  /* Give canvas more room by slightly narrowing editor side */
+  .editor-panel {
+    flex: 0 0 44% !important;
+  }
+  .canvas-panel {
+    flex: 0 0 56% !important;
+    padding: 10px !important; /* was 20px */
+  }
+
+  /* Target: 600x600 drawing + axes (40px left + 30px top) => 640x630 total */
   .canvas-grid-container {
     width: min(640px, 100%) !important;
     height: min(630px, 100%) !important;
