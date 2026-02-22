@@ -332,13 +332,13 @@ button:disabled {
 .token-function { color: #2563eb; } /* blue-600 */
 .token-string { color: #16a34a; } /* green-600 */
 .token-number { color: #d97706; } /* amber-600 */
-.token-comment { color: #9ca3af; font-style: italic; } /* gray-400 */
+.token-comment { color: #f7e96d; font-style: italic; } /* gray-400 */
 
 .dark .token-keyword { color: #e879f9; }
 .dark .token-function { color: #60a5fa; }
 .dark .token-string { color: #4ade80; }
 .dark .token-number { color: #fbbf24; }
-.dark .token-comment { color: #6b7280; }
+.dark .token-comment { color: #f7e96d; }
 
 .line-error {
   background-color: rgba(220, 38, 38, 0.15);
