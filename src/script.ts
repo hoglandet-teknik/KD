@@ -157,7 +157,29 @@ function init() {
   btnSave.addEventListener('click', saveToFile);
   btnLoad.addEventListener('click', () => fileInput.click());
   fileInput.addEventListener('change', loadFromFile);
-  btnScreenshot.addEventListener('click', takeScreenshot);
+  btnScreenshot?.addEventListener("click", () => {
+  if (!canvas) return;
+
+  // Offscreen canvas to force white background
+  const out = document.createElement("canvas");
+  out.width = canvas.width;
+  out.height = canvas.height;
+
+  const outCtx = out.getContext("2d");
+  if (!outCtx) return;
+
+  // White background
+  outCtx.fillStyle = "#ffffff";
+  outCtx.fillRect(0, 0, out.width, out.height);
+
+  // Draw the actual canvas pixels
+  outCtx.drawImage(canvas, 0, 0);
+
+  const a = document.createElement("a");
+  a.href = out.toDataURL("image/png");
+  a.download = "drawing.png";
+  a.click();
+});
 
   // Splitter Drag Logic (Percentage Based)
   let isDragging = false;
