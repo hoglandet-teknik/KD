@@ -421,7 +421,7 @@ function updateHighlighting(text: string) {
     .replace(/>/g, '&gt;');
 
   const highlighted = safeText.replace(
-    /(\/\/.*)|(".*?"|'.*?')|(\b(circle|rectangle|triangle|arc|arcUp|arcDownLeft|arcUpLeft|line|ring|text|clear|fill|Math|console)\b)|(\b(var|let|const|function|if|else|for|while|return|true|false|null|undefined)\b)|(\b\d+\b)/g,
+    /(\/\/.*)|(".*?"|'.*?')|(\b(circle|rectangle|triangle|arcRD|arcRU|arcLD|arcLU|line|ring|text|clear|fill|Math|console)\b)|(\b(var|let|const|function|if|else|for|while|return|true|false|null|undefined)\b)|(\b\d+\b)/g,
     (match, comment, string, func, keyword, number) => {
       if (comment) return `<span class="token-comment">${match}</span>`;
       if (string) return `<span class="token-string">${match}</span>`;
@@ -667,32 +667,32 @@ function runCode() {
       ctx.lineTo(x2, y2);
       ctx.lineWidth = t;
       ctx.strokeStyle = c;
-      ctx.lineCap = 'round';
+      //ctx.lineCap = 'round';
       ctx.stroke();
     },
 
     // arc(...) stays as-is: start at right, go clockwise => "down" (smile) for 180°
-    arc: (x: number, y: number, r: number, deg: number, t: number, c: string) => {
+    arcRD: (x: number, y: number, r: number, deg: number, t: number, c: string) => {
       const rad = (deg * Math.PI) / 180;
       drawArc(x, y, r, 0, rad, t, c, false);
     },
 
     // NEW #1: arcUp(...) start at right, go counterclockwise => "up" (cup) for 180°
-    arcUp: (x: number, y: number, r: number, deg: number, t: number, c: string) => {
+    arcRU: (x: number, y: number, r: number, deg: number, t: number, c: string) => {
       const rad = (deg * Math.PI) / 180;
       // from 0 to -rad, anticlockwise so it draws upward
       drawArc(x, y, r, 0, -rad, t, c, true);
     },
 
     // NEW #2: arcDownLeft(...) start at left, go clockwise => "down" (smile) left->right for 180°
-    arcDownLeft: (x: number, y: number, r: number, deg: number, t: number, c: string) => {
+    arcLU: (x: number, y: number, r: number, deg: number, t: number, c: string) => {
       const rad = (deg * Math.PI) / 180;
       // start at PI (left), sweep to PI+rad
       drawArc(x, y, r, Math.PI, Math.PI + rad, t, c, false);
     },
 
     // NEW #3: arcUpLeft(...) start at left, go counterclockwise => "up" left->right for 180°
-    arcUpLeft: (x: number, y: number, r: number, deg: number, t: number, c: string) => {
+    arcLD: (x: number, y: number, r: number, deg: number, t: number, c: string) => {
       const rad = (deg * Math.PI) / 180;
       // start at PI (left), sweep to PI-rad anticlockwise (up)
       drawArc(x, y, r, Math.PI, Math.PI - rad, t, c, true);
@@ -779,7 +779,7 @@ function levenshtein(a: string, b: string) {
 
 // Suggest similar function name if student wrote wrong one
 function suggestFunctionName(name: string): string | null {
-  const functions = ['circle', 'rectangle', 'triangle', 'arc', 'arcUp', 'arcDownLeft', 'arcUpLeft', 'line', 'ring', 'text', 'clear', 'fill'];
+  const functions = ['circle', 'rectangle', 'triangle', 'arcRD', 'arcRU', 'arcLD', 'arcLU', 'line', 'ring', 'text', 'clear', 'fill'];
   let best: { fn: string; dist: number } | null = null;
 
   for (const fn of functions) {
