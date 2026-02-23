@@ -2,9 +2,8 @@
    KD - style.css (FULL FILE)
    Clean + ready to paste
    - Keeps everything that was there
-   - Removes duplicate/contradicting patches by DISABLING them (commented) with reasons
-   - Fixes typos that prevented rules from applying (e.g., !inportant)
-   - Implements: bigger canvas + pushed left + axis titles + grid starts visually from 0 (numbers handled in script.ts)
+   - Disables old/contradicting patches (commented) with reasons
+   - Fixes typos that prevented rules from applying
    ========================================================= */
 
 :root {
@@ -337,11 +336,11 @@ button:disabled {
 }
 
 /* Syntax Highlighting Colors */
-.token-keyword { color: #c026d3; font-weight: bold; } /* purple-600 */
-.token-function { color: #2563eb; } /* blue-600 */
-.token-string { color: #16a34a; } /* green-600 */
-.token-number { color: #d97706; } /* amber-600 */
-.token-comment { color: #f7e96d; font-style: italic; } /* gray-400 */
+.token-keyword { color: #c026d3; font-weight: bold; }
+.token-function { color: #2563eb; }
+.token-string { color: #16a34a; }
+.token-number { color: #d97706; }
+.token-comment { color: #f7e96d; font-style: italic; }
 
 .dark .token-keyword { color: #e879f9; }
 .dark .token-function { color: #60a5fa; }
@@ -386,9 +385,6 @@ button:disabled {
 
 /* =========================================================
    CANVAS GRID SYSTEM (UPDATED, ACTIVE)
-   - Bigger canvas
-   - Push left
-   - Axis titles are created in renderAxes() and styled here
    ========================================================= */
 
 /* Make canvas side start a bit more to the left (give space) */
@@ -401,8 +397,8 @@ button:disabled {
 /* Grid layout: left axis column + top axis row */
 .canvas-grid-container {
   display: grid;
-  grid-template-columns: 50px 1fr; /* was 40px */
-  grid-template-rows: 40px 1fr;    /* was 30px */
+  grid-template-columns: 50px 1fr;
+  grid-template-rows: 40px 1fr;
   width: min(720px, 100%);
   height: min(710px, 100%);
   max-width: 100%;
@@ -412,15 +408,22 @@ button:disabled {
 .axis-corner {
   grid-column: 1;
   grid-row: 1;
+  position: relative;
 }
 
 .axis-container {
   position: relative;
-  overflow: hidden;
   pointer-events: none;
   font-family: 'Inter', sans-serif;
   font-size: 11px;
-  color: #6b7280; /* gray-500 */
+  color: #6b7280;
+}
+
+/* IMPORTANT:
+   CHANGED from overflow:hidden to overflow:visible
+   Reason: hidden was clipping the Y-axis title when moved beside the axis */
+.axis-container {
+  overflow: visible !important;
 }
 
 .x-axis {
@@ -504,6 +507,7 @@ canvas {
   font-weight: 600;
   color: #374151;
   white-space: nowrap;
+  z-index: 5;
 }
 
 .axis-title-x {
@@ -512,13 +516,32 @@ canvas {
   transform: translateX(-50%);
 }
 
+/* Y title beside the Y axis (not over the grid) */
 .axis-title-y {
   top: 50%;
-  left: -6px;                 /* push it OUTSIDE the axis line */
+  left: 6px;
   transform: translateY(-50%) rotate(-90deg);
   transform-origin: left center;
-  background: transparent;
   pointer-events: none;
+  background: transparent;
+}
+
+/* Single 0 in the corner (intersection of axes) */
+.corner-zero {
+  position: absolute;
+  right: 6px;
+  bottom: 4px;
+  font-size: 11px;
+  color: #6b7280;
+  font-family: 'Inter', sans-serif;
+  pointer-events: none;
+}
+
+/* (optional) if you ever add x=0 label with class, keep it non-centered */
+.x-label-zero {
+  transform: none !important;
+  left: 0px !important;
+  padding-left: 4px;
 }
 
 .coords-tooltip {
@@ -540,7 +563,6 @@ canvas {
    DISABLED (old) iPad canvas sizing patch
    Reason: It forced 640x630 and prevented the canvas from
    becoming bigger, which you explicitly wanted.
-   Keeping for reference only.
    ========================================================= */
 /*
 @media (pointer: coarse) and (max-width: 1024px) {
@@ -699,7 +721,6 @@ canvas {
     padding: 10px;
   }
 
-  /* Touch friendly adjustments */
   button {
     padding: 10px 14px;
     font-size: 14px;
@@ -739,10 +760,6 @@ canvas {
   background-color: #166534;
 }
 
-/* =========================================================
-   iPad-only fixes + syntax colors (SAFE PATCH)
-   ========================================================= */
-
 /* iOS Safari viewport quirks (iPad only) */
 @media (pointer: coarse) {
   @supports (height: 100dvh) {
@@ -759,28 +776,16 @@ canvas {
 .token-comment  { color: #94a3b8 !important; font-style: italic; }
 .token-keyword  { color: #db2777 !important; font-weight: 700; }
 
-/* =========================================================
-   iPad SAFE PATCH (no desktop changes)
-   - Keep syntax highlighting overlay ON
-   - Fix caret/tap behavior on iPad Safari
-   - Slightly reduce header + error panel to fit iPad
-   ========================================================= */
+/* iPad SAFE PATCH */
 @media (pointer: coarse) and (max-width: 1024px) {
-  /* Ensure highlighting layer is visible on iPad */
-  #highlighting {
-    display: block !important;
-  }
+  #highlighting { display: block !important; }
 
-  /* iOS caret/tap fix:
-     If textarea text is fully transparent, iOS Safari can misplace caret.
-     Use "almost transparent" text instead of fully transparent. */
   #code-editor {
     color: rgba(0, 0, 0, 0.001) !important;
     -webkit-text-fill-color: rgba(0, 0, 0, 0.001) !important;
     caret-color: var(--text-color) !important;
   }
 
-  /* Fit layout slightly better on iPad */
   header {
     height: 52px !important;
     padding: 0 14px !important;
@@ -790,35 +795,21 @@ canvas {
     height: 92px !important;
   }
 
-  /* Reduce editor padding slightly */
   #code-editor,
   #highlighting {
     padding: 8px !important;
-  }
-
-  /* Improve iOS editor tap/caret behavior */
-  #code-editor, #highlighting {
     font-size: 16px !important;
     line-height: 1.5 !important;
   }
 
-  /* Give canvas more room by narrowing editor slightly (iPad only) */
-  .editor-panel {
-    flex: 0 0 44% !important;
-  }
+  .editor-panel { flex: 0 0 44% !important; }
+  .canvas-panel { flex: 0 0 56% !important; padding: 10px !important; }
 
-  .canvas-panel {
-    flex: 0 0 56% !important;
-    padding: 10px !important;
-  }
-
-  /* Make our new bigger canvas fit better on iPad */
   .canvas-grid-container {
     width: min(720px, 100%) !important;
     height: min(710px, 100%) !important;
   }
 
-  /* Make canvas wrapper responsive on iPad (don’t overflow) */
   .canvas-wrapper {
     width: min(660px, 100%) !important;
     height: min(660px, 100%) !important;
@@ -827,14 +818,13 @@ canvas {
 
 /* =========================================================
    Color-tools compact on iPad/touch (ACTIVE)
-   - Reduces whitespace so buttons don't touch edges
    ========================================================= */
 @media (pointer: coarse) {
   .color-tools {
     justify-content: flex-start;
     gap: 6px;
     flex-wrap: wrap;
-    padding-right: 20px; /* create breathing space on right */
+    padding-right: 20px;
   }
 
   .color-tools button {
@@ -845,7 +835,6 @@ canvas {
     white-space: nowrap;
   }
 
-  /* If you have a class on the submission button (recommended), this tightens it a bit */
   .color-tools .btn-submission {
     padding: 5px 7px;
     font-size: 11.5px;
@@ -856,129 +845,36 @@ canvas {
 /* =========================================================
    DISABLED duplicate/buggy patches from yesterday
    Reasons:
-   - duplicated rules (hard to maintain, unpredictable precedence)
-   - one had a typo: "flex-wrap: wrap !inportant" (never applied)
-   - one had nested CSS by mistake inside .btn-submission block (invalid CSS)
-   Keeping them commented for traceability.
+   - duplicated rules (unpredictable precedence)
+   - typo "!inportant" (never applied)
+   - invalid nesting inside CSS selector (breaks build)
    ========================================================= */
 
-/* (1) Duplicate max-width:768 button compact patch (disabled: duplicates pointer:coarse patch) */
 /*
 @media (max-width: 768px) {
-  .color-tools button {
-    padding: 6px 10px !important;
-    font-size: 12px !important;
-    line-height: 1.2 !important;
-    gap: 6px !important;
-    white-space: nowrap !important;
-  }
-
-  .color-tools {
-    gap: 8px !important;
-    flex-wrap: wrap !important;
-  }
+  .color-tools button { ... }
+  .color-tools { ... }
 }
 */
 
-/* (2) Broken patch with typo "!inportant" and invalid nesting (disabled) */
 /*
 @media (pointer: coarse) {
-  .color-tools button {
-    padding: 6px 10px !important;
-    font-size: 12px !important;
-    line-height: 1.2 !important;
-    gap: 6px !important;
-    white-space: nowrap !important;
-  }
-
-  .color-tools {
-    gap: 8px !important;
-    flex-wrap: wrap !inportant;  // TYPO: invalid -> rule never applied
-  }
+  .color-tools { flex-wrap: wrap !inportant; }  // TYPO -> invalid
 }
-
 @media (max-width: 768px) {
-  .color-tools {
-    gap: 6px !important;
-    padding: 6px 10px !important;
-  }
-
-  .color-tools button {
-    padding: 5px 8px !important;
-    font-size: 12px !important;
-    line-height: 1.1 !important;
-    gap: 5px !important;
-  }
-
   .color-tools .btn-submission {
-    padding: 5px 7px !important;
-    font-size: 11.5px !important;
-    letter-spacing: -0.1px;
-
-    .color-tools { justify-content: flex-start !important; } // INVALID nesting in plain CSS
+    ...
+    .color-tools { justify-content: flex-start !important; } // INVALID nesting
   }
 }
 */
 
 /* =========================================================
-   AXIS FIXES
-   - prevent clipping of axis titles
-   - make x=0 label fully visible
+   DISABLED old lock button system (.view-lock-btn)
+   Reason: you now use #btn-view-lock (working). Keeping this
+   disabled prevents showing a SECOND (broken/duplicate) lock button.
    ========================================================= */
-
-/* IMPORTANT: was overflow:hidden which clipped Y-Axis title when moved */
-.axis-container {
-  overflow: visible !important;
-}
-
-/* x-label at 0 should not be centered */
-.x-label-zero {
-  transform: none !important;   /* cancels translateX(-50%) */
-  left: 0px !important;
-  padding-left: 4px;            /* small breathing space */
-}
-
-/* Ensure Y title stays beside the Y axis, not clipped */
-.axis-title-y {
-  top: 50%;
-  left: 6px; /* inside the Y axis gutter, not over the grid */
-  transform: translateY(-50%) rotate(-90deg);
-  transform-origin: left center;
-  pointer-events: none;
-  z-index: 5;
-}
-
-/* X title stays centered */
-.axis-title-x {
-  z-index: 5;
-}
-
-/* Single 0 in the corner (intersection of axes) */
-.axis-corner {
-  position: relative;
-}
-
-.corner-zero {
-  position: absolute;
-  right: 6px;     /* place near the intersection */
-  bottom: 4px;
-  font-size: 11px;
-  color: #6b7280;
-  font-family: 'Inter', sans-serif;
-  pointer-events: none;
-}
-
-/* =========================================================
-   NEW: Canvas view lock button (overlay)
-   - No impact on drawing
-   - No toolbar layout changes
-   ========================================================= */
-
-.canvas-wrapper {
-  /* ensure overlay works even if old CSS didn't set it */
-  position: relative;
-}
-
+/*
 .view-lock-btn {
   position: absolute;
   top: 10px;
@@ -995,75 +891,71 @@ canvas {
   justify-content: center;
   gap: 0;
   cursor: pointer;
-  z-index: 40; /* above canvas + tooltip */
+  z-index: 40;
   backdrop-filter: blur(6px);
 }
 
-.dark .view-lock-btn {
-  background: rgba(31, 41, 55, 0.85);
-}
+.dark .view-lock-btn { background: rgba(31, 41, 55, 0.85); }
+.view-lock-btn:hover { background: rgba(255, 255, 255, 1); }
+.dark .view-lock-btn:hover { background: rgba(31, 41, 55, 1); }
 
-.view-lock-btn:hover {
-  background: rgba(255, 255, 255, 1);
-}
-
-.dark .view-lock-btn:hover {
-  background: rgba(31, 41, 55, 1);
-}
-
-/* Toggle icons based on lock state */
 .view-lock-btn .icon-locked { display: none; }
 .view-lock-btn .icon-unlocked { display: block; }
-
 body.view-locked .view-lock-btn .icon-locked { display: block; }
 body.view-locked .view-lock-btn .icon-unlocked { display: none; }
+*/
 
 /* =========================================================
-   NEW: Lock view behavior
-   - Prevent accidental panning/scrolling when locked
+   View Lock Button (overlay) — ACTIVE
+   - Transparent icon (no white background) like theme toggle
+   - Positioned top-left of canvas area
    ========================================================= */
-
-body.view-locked .canvas-panel {
-  overflow: hidden !important;
-  overscroll-behavior: contain;
-  touch-action: none; /* prevents touch scroll on iPad */
-}
-
-/* =========================
-   View Lock Button (overlay)
-   ========================= */
 .canvas-panel {
   position: relative; /* needed for overlay positioning */
 }
 
-.btn-view-lock {
+#btn-view-lock {
   position: absolute;
   top: 12px;
-  left: 12px;              /* ✅ أقصى اليسار فوق الكانفاس */
+  left: 12px;
   z-index: 2000;
-  width: 40px;
-  height: 40px;
+
+  width: 28px;
+  height: 28px;
+
+  background: transparent;   /* no background -> doesn't cover the corner 0 */
+  border: none;              /* no border */
+  box-shadow: none;          /* no shadow */
   padding: 0;
-  border-radius: 10px;
+
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--panel-bg);
-  border: 1px solid var(--border-color);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+
+  cursor: pointer;
 }
 
-.btn-view-lock:hover {
-  background: var(--bg-color);
+#btn-view-lock svg {
+  width: 22px;
+  height: 22px;
+  stroke: var(--text-color);
+  opacity: 0.85;
+  transition: transform 0.15s ease, opacity 0.15s ease;
 }
 
-.btn-view-lock svg {
-  width: 20px;
-  height: 20px;
+#btn-view-lock:hover svg {
+  opacity: 1;
+  transform: scale(1.08);
+}
+
+/* Locked state color cue */
+body.view-locked #btn-view-lock svg {
+  stroke: var(--danger-color);
 }
 
 /* When view is locked: prevent panning/scrolling container */
 body.view-locked .canvas-panel {
   overflow: hidden !important;
-  touch-action: none !important; /* ✅ يمنع سحب/تحريك الصفحة/الكانفاس */
+  touch-action: none !important;
+  overscroll-behavior: contain;
 }
