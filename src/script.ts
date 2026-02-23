@@ -895,26 +895,34 @@ function renderAxes() {
 
   const step = 50;
 
-  // X labels + ticks
-  for (let x = step; x <= width; x += step) {
+  /* =========================================================
+     1) X AXIS (START FROM 0)
+  ========================================================= */
+
+  for (let x = 0; x <= width; x += step) {
+    // Label
     const label = document.createElement('div');
     label.className = 'axis-label x-label';
     label.style.left = `${x}px`;
-    label.textContent = `${x}`;
+    label.textContent = `${x}`;   // 0 will now appear
     xAxisContainer.appendChild(label);
 
+    // Tick
     const tick = document.createElement('div');
     tick.className = 'axis-tick x-tick';
     tick.style.left = `${x}px`;
     xAxisContainer.appendChild(tick);
   }
 
-  // Y labels + ticks
-  for (let y = step; y <= height; y += step) {
+  /* =========================================================
+     2) Y AXIS (START FROM 0)
+  ========================================================= */
+
+  for (let y = 0; y <= height; y += step) {
     const label = document.createElement('div');
     label.className = 'axis-label y-label';
     label.style.top = `${y}px`;
-    label.textContent = `${y}`;
+    label.textContent = `${y}`;   // 0 will now appear
     yAxisContainer.appendChild(label);
 
     const tick = document.createElement('div');
@@ -922,6 +930,26 @@ function renderAxes() {
     tick.style.top = `${y}px`;
     yAxisContainer.appendChild(tick);
   }
+
+  /* =========================================================
+     3) X-AXIS TITLE WITH ARROWS
+     Positioned centered above axis
+  ========================================================= */
+
+  const xTitle = document.createElement('div');
+  xTitle.className = 'axis-title-x';
+  xTitle.textContent = 'X-Axis   ←   →';
+  xAxisContainer.appendChild(xTitle);
+
+  /* =========================================================
+     4) Y-AXIS TITLE WITH ARROWS
+     Rotated and centered
+  ========================================================= */
+
+  const yTitle = document.createElement('div');
+  yTitle.className = 'axis-title-y';
+  yTitle.textContent = 'Y-Axis   ↑   ↓';
+  yAxisContainer.appendChild(yTitle);
 }
 
 /* =========================================================
