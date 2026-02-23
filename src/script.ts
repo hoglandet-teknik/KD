@@ -50,6 +50,37 @@ let historyIndex = 0;
 let isDarkMode = false;
 let activeErrorLine = -1;
 
+  // =========================================================
+// NEW: Smart history snapshots (Undo/Redo not char-by-char)
+// =========================================================
+let historyTimeout: number | undefined;
+const HISTORY_DEBOUNCE_MS = 700;
+
+function scheduleHistorySnapshot(ev?: InputEvent) {
+  // Decide if we should snapshot immediately
+  const inputType = (ev as any)?.inputType as string | undefined;
+
+  const immediateTypes = new Set([
+    'insertFromPaste',
+    'deleteByCut',
+    'insertLineBreak',
+    'insertParagraph',
+  ]);
+
+  const shouldCommitNow = inputType ? immediateTypes.has(inputType) : false;
+
+  if (historyTimeout) window.clearTimeout(historyTimeout);
+
+  if (shouldCommitNow) {
+    saveToHistory(code);
+    return;
+  }
+
+  historyTimeout = window.setTimeout(() => {
+    saveToHistory(code);
+  }, HISTORY_DEBOUNCE_MS);
+}
+
 // DOM Elements
 const codeEditor = document.getElementById('code-editor') as HTMLTextAreaElement | null;
 const highlighting = document.getElementById('highlighting') as HTMLElement | null;
@@ -64,6 +95,8 @@ const colorInput = document.getElementById('color-input') as HTMLInputElement | 
 const colorHex = document.getElementById('color-hex') as HTMLInputElement | null;
 const fileInput = document.getElementById('file-input') as HTMLInputElement | null;
 const canvasWrapper = document.querySelector('.canvas-wrapper') as HTMLElement | null;
+const canvasPanel = document.querySelector('.canvas-panel') as HTMLElement | null;
+const btnViewLock = document.getElementById('btn-view-lock') as HTMLButtonElement | null;
 const xAxisContainer = document.getElementById('x-axis-container') as HTMLElement | null;
 const yAxisContainer = document.getElementById('y-axis-container') as HTMLElement | null;
 
@@ -142,7 +175,9 @@ function init() {
     !btnCancelSubmission ||
     !btnGenerateDocx ||
     !submissionAssignment ||
-    !submissionStatus
+    !submissionStatus ||
+    !canvasPanel ||
+    !btnViewLock
   ) {
     console.error('Missing required DOM elements.');
     return;
@@ -167,6 +202,7 @@ function init() {
     updateHighlighting(code);
     updateLineNumbers();
     runCode();
+	saveToHistory(code);
   }
 
   // Resize canvas to fit container
@@ -174,7 +210,7 @@ function init() {
   window.addEventListener('resize', resizeCanvas);
 
   // Event Listeners
-  codeEditor.addEventListener('input', handleInput);
+  codeEditor.addEventListener('input', (e) => handleInput(e as InputEvent));
   codeEditor.addEventListener('scroll', syncScroll);
   codeEditor.addEventListener('keydown', handleKeydown);
 
@@ -402,16 +438,20 @@ function resizeCanvas() {
 }
 
 // Editor Logic
-function handleInput() {
+function handleInput(ev?: InputEvent) {
   if (!codeEditor) return;
+
   const newCode = codeEditor.value;
   if (newCode !== code) {
     code = newCode;
-	saveToHistory(newCode);
     activeErrorLine = -1;
+
     updateHighlighting(code);
     updateLineNumbers();
     debouncedSave();
+
+    // ✅ Smart snapshot instead of char-by-char
+    scheduleHistorySnapshot(ev);
   }
 }
 

@@ -967,3 +967,64 @@ canvas {
   font-family: 'Inter', sans-serif;
   pointer-events: none;
 }
+
+/* =========================================================
+   NEW: Canvas view lock button (overlay)
+   - No impact on drawing
+   - No toolbar layout changes
+   ========================================================= */
+
+.canvas-wrapper {
+  /* ensure overlay works even if old CSS didn't set it */
+  position: relative;
+}
+
+.view-lock-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--text-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  cursor: pointer;
+  z-index: 40; /* above canvas + tooltip */
+  backdrop-filter: blur(6px);
+}
+
+.dark .view-lock-btn {
+  background: rgba(31, 41, 55, 0.85);
+}
+
+.view-lock-btn:hover {
+  background: rgba(255, 255, 255, 1);
+}
+
+.dark .view-lock-btn:hover {
+  background: rgba(31, 41, 55, 1);
+}
+
+/* Toggle icons based on lock state */
+.view-lock-btn .icon-locked { display: none; }
+.view-lock-btn .icon-unlocked { display: block; }
+
+body.view-locked .view-lock-btn .icon-locked { display: block; }
+body.view-locked .view-lock-btn .icon-unlocked { display: none; }
+
+/* =========================================================
+   NEW: Lock view behavior
+   - Prevent accidental panning/scrolling when locked
+   ========================================================= */
+
+body.view-locked .canvas-panel {
+  overflow: hidden !important;
+  overscroll-behavior: contain;
+  touch-action: none; /* prevents touch scroll on iPad */
+}

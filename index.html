@@ -233,9 +233,24 @@
             <div id="x-axis-container" class="axis-container x-axis"></div>
             <div id="y-axis-container" class="axis-container y-axis"></div>
             <div class="canvas-wrapper">
-              <canvas id="drawing-canvas"></canvas>
-              <div id="coords-tooltip" class="coords-tooltip" style="display: none;">Koordinater: x: 0, y: 0</div>
-            </div>
+  <canvas id="drawing-canvas"></canvas>
+
+  <!-- NEW: View lock/unlock (overlay button, does not affect drawing) -->
+  <button id="btn-view-lock" class="view-lock-btn" type="button" aria-label="Lås vy" title="Lås vy">
+    <!-- Locked icon -->
+    <svg class="icon-locked" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <rect x="3" y="11" width="18" height="11" rx="2"></rect>
+      <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+    </svg>
+    <!-- Unlocked icon -->
+    <svg class="icon-unlocked" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <rect x="3" y="11" width="18" height="11" rx="2"></rect>
+      <path d="M7 11V7a5 5 0 0 1 9.5-2"></path>
+    </svg>
+  </button>
+
+  <div id="coords-tooltip" class="coords-tooltip" style="display: none;">Koordinater: x: 0, y: 0</div>
+</div>
           </div>
         </div>
       </main>
