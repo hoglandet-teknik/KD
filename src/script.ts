@@ -13,15 +13,15 @@ circle(250, 250, 30, "#ff0000");
 // Cloudflare Worker origin (production)
 const WORKER_ORIGIN = 'https://koda-worker.akram82.workers.dev';
 
-// Build correct base URL on GitHub Pages using Vite BASE_URL (e.g., /KD/)
+// Build correct base URL on GitHub Pages using Vite BASE_URL (e.g., /kd/)
 function getAppBaseUrl() {
-  // Example result: https://hoglandet-teknik.github.io/KD
+  // Example result: https://hoglandet-teknik.github.io/kd
   return new URL(import.meta.env.BASE_URL, window.location.origin).toString().replace(/\/+$/, '');
 }
 
 // Read shared id from URL:
-// 1) Preferred: https://.../KD/#/s/<id>
-// 2) Back-compat: https://.../KD/?id=<id>
+// 1) Preferred: https://.../kd/#/s/<id>
+// 2) Back-compat: https://.../kd/?id=<id>
 function getSharedIdFromUrl(): string | null {
   const hash = window.location.hash || '';
   const m = hash.match(/^#\/s\/([A-Za-z0-9_-]+)$/);
@@ -384,7 +384,7 @@ async function createShareLink() {
 
     const data = await response.json();
 
-    const base = getAppBaseUrl(); // https://hoglandet-teknik.github.io/KD
+    const base = getAppBaseUrl(); // https://hoglandet-teknik.github.io/kd
     const link = `${base}/#/s/${data.id}`;
 
     shareLinkInput.value = link;

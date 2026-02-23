@@ -7,7 +7,7 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, '.', '');
 
   return {
-    // مهم لـ GitHub Pages: اسم الريبو هو KD
+    // مهم لـ GitHub Pages: اسم الريبو هو kd
     base: '/kd/',
 
     plugins: [react(), tailwindcss()],
