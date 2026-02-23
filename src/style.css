@@ -822,3 +822,28 @@ canvas {
     flex-wrap: wrap !important;
   }
 }
+
+/* =========================================================
+   iPad/mobile: make .color-tools row more compact
+   (reduces internal whitespace so buttons don't touch edges)
+   ========================================================= */
+@media (max-width: 768px) {
+  .color-tools {
+    gap: 6px !important;            /* was 8 */
+    padding: 6px 10px !important;   /* slightly tighter */
+  }
+
+  .color-tools button {
+    padding: 5px 8px !important;    /* was 6px 10px */
+    font-size: 12px !important;
+    line-height: 1.1 !important;
+    gap: 5px !important;
+  }
+
+  /* Make just the submission button a touch tighter */
+  .color-tools .btn-submission {
+    padding: 5px 7px !important;
+    font-size: 11.5px !important;
+    letter-spacing: -0.1px;         /* tiny, safe */
+  }
+}
