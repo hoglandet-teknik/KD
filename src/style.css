@@ -845,5 +845,7 @@ canvas {
     padding: 5px 7px !important;
     font-size: 11.5px !important;
     letter-spacing: -0.1px;         /* tiny, safe */
+	
+	.color-tools { justify-content: flex-start !important; }
   }
 }
