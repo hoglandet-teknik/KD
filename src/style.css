@@ -44,6 +44,13 @@
   --selection-bg: #374151;
 }
 
+  /* Responsive canvas size: auto scales with screen */
+  --axis-x-h: 40px;  /* top axis height */
+  --axis-y-w: 50px;  /* left axis width */
+
+  /* default (desktop/laptops): grows on large screens, shrinks on small */
+  --canvas-size: clamp(360px, 62vmin, 660px);
+
 * {
   box-sizing: border-box;
   margin: 0;
@@ -399,8 +406,8 @@ button:disabled {
   display: grid;
   grid-template-columns: 50px 1fr;
   grid-template-rows: 40px 1fr;
-  width: min(720px, 100%);
-  height: min(710px, 100%);
+  width: var(--canvas-size);
+  height: var(--canvas-size);
   max-width: 100%;
   max-height: 100%;
 }
@@ -564,14 +571,15 @@ canvas {
    Reason: It forced 640x630 and prevented the canvas from
    becoming bigger, which you explicitly wanted.
    ========================================================= */
-/*
+
 @media (pointer: coarse) and (max-width: 1024px) {
   .canvas-grid-container {
     width: min(640px, 100%) !important;
     height: min(630px, 100%) !important;
+	:root { --canvas-size: clamp(320px, 78vmin, 640px); }
   }
 }
-*/
+
 
 /* Modal */
 .modal-overlay {
