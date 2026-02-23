@@ -1028,3 +1028,42 @@ body.view-locked .canvas-panel {
   overscroll-behavior: contain;
   touch-action: none; /* prevents touch scroll on iPad */
 }
+
+/* =========================
+   View Lock Button (overlay)
+   ========================= */
+.canvas-panel {
+  position: relative; /* needed for overlay positioning */
+}
+
+.btn-view-lock {
+  position: absolute;
+  top: 12px;
+  left: 12px;              /* ✅ أقصى اليسار فوق الكانفاس */
+  z-index: 2000;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--panel-bg);
+  border: 1px solid var(--border-color);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.btn-view-lock:hover {
+  background: var(--bg-color);
+}
+
+.btn-view-lock svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* When view is locked: prevent panning/scrolling container */
+body.view-locked .canvas-panel {
+  overflow: hidden !important;
+  touch-action: none !important; /* ✅ يمنع سحب/تحريك الصفحة/الكانفاس */
+}

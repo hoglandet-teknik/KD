@@ -50,6 +50,46 @@ let historyIndex = 0;
 let isDarkMode = false;
 let activeErrorLine = -1;
 
+// =========================
+// View Lock (prevent panning)
+// =========================
+let isViewLocked = false;
+
+function lockIconSvg(locked: boolean) {
+  return locked
+    ? `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+         <path d="M7 10V8a5 5 0 0 1 10 0v2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+         <path d="M6 10h12v10H6V10Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+       </svg>`
+    : `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+         <path d="M17 10V8a5 5 0 0 0-9.5-2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+         <path d="M6 10h12v10H6V10Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+       </svg>`;
+}
+
+function applyViewLock(locked: boolean) {
+  isViewLocked = locked;
+
+  document.body.classList.toggle('view-locked', isViewLocked);
+
+  if (btnViewLock) {
+    btnViewLock.innerHTML = lockIconSvg(isViewLocked);
+    btnViewLock.title = isViewLocked ? 'Lås upp vy' : 'Lås vy';
+    btnViewLock.setAttribute('aria-label', isViewLocked ? 'Lås upp vy' : 'Lås vy');
+    btnViewLock.setAttribute('aria-pressed', String(isViewLocked));
+  }
+
+  if (canvasPanel) {
+    if (isViewLocked) {
+      canvasPanel.style.overflow = 'hidden';
+      canvasPanel.style.touchAction = 'none';
+    } else {
+      canvasPanel.style.overflow = 'auto';
+      canvasPanel.style.touchAction = 'auto';
+    }
+  }
+}
+
   // =========================================================
 // NEW: Smart history snapshots (Undo/Redo not char-by-char)
 // =========================================================
@@ -213,6 +253,13 @@ function init() {
   codeEditor.addEventListener('input', (e) => handleInput(e as InputEvent));
   codeEditor.addEventListener('scroll', syncScroll);
   codeEditor.addEventListener('keydown', handleKeydown);
+  // View lock button
+btnViewLock.addEventListener('click', () => {
+  applyViewLock(!isViewLocked);
+});
+
+// default state
+applyViewLock(false);
 
   btnRun.addEventListener('click', runCode);
   btnUndo.addEventListener('click', undo);
