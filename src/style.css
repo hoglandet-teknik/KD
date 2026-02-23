@@ -566,6 +566,60 @@ canvas {
   white-space: nowrap;
 }
 
+/* =========================================================
+   NEW: Submission modal minimal styles (SAFE)
+   ========================================================= */
+.modal--submission {
+  max-width: 520px;
+}
+
+.submission-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.submission-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+.submission-input {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  font-family: inherit;
+}
+
+.submission-input:focus {
+  outline: 2px solid rgba(99, 102, 241, 0.35);
+  outline-offset: 1px;
+}
+
+.submission-hint {
+  font-size: 12px;
+  color: var(--line-num-text);
+}
+
+.submission-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
+.submission-status {
+  margin-top: 10px;
+  min-height: 16px;
+  font-size: 12px;
+  color: var(--line-num-text);
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   main {
@@ -637,8 +691,6 @@ canvas {
     }
   }
 }
-
-
 
 /* 3) iPad canvas target 600x600 WITHOUT affecting desktop.
       Your grid has axes: 40px left + 30px top, so total target = 640 x 630 */

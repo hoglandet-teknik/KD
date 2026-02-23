@@ -3,6 +3,18 @@
 // GitHub Pages share links: #/s/<id> and Worker fetch
 // =========================
 
+import {
+  AlignmentType,
+  Document,
+  ExternalHyperlink,
+  HeadingLevel,
+  ImageRun,
+  Packer,
+  Paragraph,
+  TextRun,
+} from "docx";
+import { saveAs } from "file-saver";
+
 // Default Example Code
 const DEFAULT_CODE = `// Exempel: En enkel cirkel
 clear();
@@ -73,10 +85,19 @@ const btnCopyLink = document.getElementById('btn-copy-link') as HTMLButtonElemen
 const splitter = document.getElementById('splitter') as HTMLElement | null;
 const mainContainer = document.querySelector('main') as HTMLElement | null;
 
-// NEW: Help modal elements
+// Help modal elements
 const btnHelp = document.getElementById('btn-help') as HTMLButtonElement | null;
 const helpModal = document.getElementById('help-modal') as HTMLElement | null;
 const btnCloseHelp = document.getElementById('btn-close-help') as HTMLButtonElement | null;
+
+// NEW: Submission elements
+const btnSubmission = document.getElementById('btn-submission') as HTMLButtonElement | null;
+const submissionModal = document.getElementById('submission-modal') as HTMLElement | null;
+const btnCloseSubmission = document.getElementById('btn-close-submission') as HTMLButtonElement | null;
+const btnCancelSubmission = document.getElementById('btn-cancel-submission') as HTMLButtonElement | null;
+const btnGenerateDocx = document.getElementById('btn-generate-docx') as HTMLButtonElement | null;
+const submissionAssignment = document.getElementById('submission-assignment') as HTMLInputElement | null;
+const submissionStatus = document.getElementById('submission-status') as HTMLElement | null;
 
 // Initialization
 function init() {
@@ -114,7 +135,14 @@ function init() {
     !mainContainer ||
     !btnHelp ||
     !helpModal ||
-    !btnCloseHelp
+    !btnCloseHelp ||
+    !btnSubmission ||
+    !submissionModal ||
+    !btnCloseSubmission ||
+    !btnCancelSubmission ||
+    !btnGenerateDocx ||
+    !submissionAssignment ||
+    !submissionStatus
   ) {
     console.error('Missing required DOM elements.');
     return;
@@ -158,28 +186,28 @@ function init() {
   btnLoad.addEventListener('click', () => fileInput.click());
   fileInput.addEventListener('change', loadFromFile);
   btnScreenshot?.addEventListener("click", () => {
-  if (!canvas) return;
+    if (!canvas) return;
 
-  // Offscreen canvas to force white background
-  const out = document.createElement("canvas");
-  out.width = canvas.width;
-  out.height = canvas.height;
+    // Offscreen canvas to force white background
+    const out = document.createElement("canvas");
+    out.width = canvas.width;
+    out.height = canvas.height;
 
-  const outCtx = out.getContext("2d");
-  if (!outCtx) return;
+    const outCtx = out.getContext("2d");
+    if (!outCtx) return;
 
-  // White background
-  outCtx.fillStyle = "#ffffff";
-  outCtx.fillRect(0, 0, out.width, out.height);
+    // White background
+    outCtx.fillStyle = "#ffffff";
+    outCtx.fillRect(0, 0, out.width, out.height);
 
-  // Draw the actual canvas pixels
-  outCtx.drawImage(canvas, 0, 0);
+    // Draw the actual canvas pixels
+    outCtx.drawImage(canvas, 0, 0);
 
-  const a = document.createElement("a");
-  a.href = out.toDataURL("image/png");
-  a.download = "drawing.png";
-  a.click();
-});
+    const a = document.createElement("a");
+    a.href = out.toDataURL("image/png");
+    a.download = "drawing.png";
+    a.click();
+  });
 
   // Splitter Drag Logic (Percentage Based)
   let isDragging = false;
@@ -254,11 +282,34 @@ function init() {
     if (e.target === shareModal) shareModal.style.display = 'none';
   });
 
-  // NEW: Help modal open/close
+  // Help modal open/close
   btnHelp.addEventListener('click', () => (helpModal.style.display = 'flex'));
   btnCloseHelp.addEventListener('click', () => (helpModal.style.display = 'none'));
   helpModal.addEventListener('click', (e) => {
     if (e.target === helpModal) helpModal.style.display = 'none';
+  });
+
+  // NEW: Submission modal open/close
+  const closeSubmissionModal = () => {
+    submissionModal.style.display = 'none';
+    submissionStatus.textContent = '';
+  };
+
+  btnSubmission.addEventListener('click', () => {
+    submissionModal.style.display = 'flex';
+    submissionStatus.textContent = '';
+    // focus input (safe)
+    setTimeout(() => submissionAssignment.focus(), 0);
+  });
+
+  btnCloseSubmission.addEventListener('click', closeSubmissionModal);
+  btnCancelSubmission.addEventListener('click', closeSubmissionModal);
+  submissionModal.addEventListener('click', (e) => {
+    if (e.target === submissionModal) closeSubmissionModal();
+  });
+
+  btnGenerateDocx.addEventListener('click', async () => {
+    await generateSubmissionDocx();
   });
 
   themeToggle.addEventListener('click', toggleTheme);
@@ -601,7 +652,7 @@ function clearCanvas() {
   ctx.restore();
 }
 
-// NEW: helper to draw arcs with explicit start/end angles
+// helper to draw arcs with explicit start/end angles
 function drawArc(x: number, y: number, r: number, startRad: number, endRad: number, t: number, c: string, anticlockwise?: boolean) {
   if (!ctx) return;
   ctx.beginPath();
@@ -699,24 +750,21 @@ function runCode() {
       drawArc(x, y, r, 0, rad, t, c, false);
     },
 
-    // NEW #1: arcUp(...) start at right, go counterclockwise => "up" (cup) for 180°
+    // arcRU: start at right, go counterclockwise => "up" for 180°
     arcRU: (x: number, y: number, r: number, deg: number, t: number, c: string) => {
       const rad = (deg * Math.PI) / 180;
-      // from 0 to -rad, anticlockwise so it draws upward
       drawArc(x, y, r, 0, -rad, t, c, true);
     },
 
-    // NEW #2: arcDownLeft(...) start at left, go clockwise => "down" (smile) left->right for 180°
+    // arcLU: start at left, go clockwise => down
     arcLU: (x: number, y: number, r: number, deg: number, t: number, c: string) => {
       const rad = (deg * Math.PI) / 180;
-      // start at PI (left), sweep to PI+rad
       drawArc(x, y, r, Math.PI, Math.PI + rad, t, c, false);
     },
 
-    // NEW #3: arcUpLeft(...) start at left, go counterclockwise => "up" left->right for 180°
+    // arcLD: start at left, go counterclockwise => up
     arcLD: (x: number, y: number, r: number, deg: number, t: number, c: string) => {
       const rad = (deg * Math.PI) / 180;
-      // start at PI (left), sweep to PI-rad anticlockwise (up)
       drawArc(x, y, r, Math.PI, Math.PI - rad, t, c, true);
     },
 
@@ -872,6 +920,213 @@ function renderAxes() {
     tick.className = 'axis-tick y-tick';
     tick.style.top = `${y}px`;
     yAxisContainer.appendChild(tick);
+  }
+}
+
+/* =========================================================
+   NEW FEATURE: Haldor submission DOCX (client-side only)
+   - Ensures share link exists (creates if missing)
+   - White-background canvas image
+   - Full code in monospace
+   ========================================================= */
+
+function setSubmissionStatus(msg: string) {
+  if (!submissionStatus) return;
+  submissionStatus.textContent = msg;
+}
+
+function sanitizeFilenamePart(s: string) {
+  return (s || '')
+    .trim()
+    .replace(/[\/\\?%*:|"<>]/g, '-')  // windows forbidden
+    .replace(/\s+/g, ' ')
+    .slice(0, 80);
+}
+
+async function ensureShareLinkForDoc(): Promise<string> {
+  // If already on a shared link, just reuse it.
+  const existingId = getSharedIdFromUrl();
+  if (existingId) {
+    const base = getAppBaseUrl();
+    return `${base}/#/s/${existingId}`;
+  }
+
+  // Otherwise create a share id without touching existing share modal/system UI.
+  const response = await fetch(`${WORKER_ORIGIN}/api/share`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ code }),
+  });
+
+  if (!response.ok) {
+    if (response.status === 413) throw new Error('Koden är för stor (max 50KB)');
+    throw new Error('Kunde inte skapa länk');
+  }
+
+  const data = await response.json();
+  const base = getAppBaseUrl();
+  return `${base}/#/s/${data.id}`;
+}
+
+function canvasToWhitePngBlob(): Promise<Blob> {
+  return new Promise((resolve, reject) => {
+    if (!canvas) return reject(new Error('Canvas saknas'));
+
+    const out = document.createElement("canvas");
+    out.width = canvas.width;
+    out.height = canvas.height;
+
+    const outCtx = out.getContext("2d");
+    if (!outCtx) return reject(new Error('Canvas context saknas'));
+
+    // White background
+    outCtx.fillStyle = "#ffffff";
+    outCtx.fillRect(0, 0, out.width, out.height);
+
+    // Draw original
+    outCtx.drawImage(canvas, 0, 0);
+
+    out.toBlob((blob) => {
+      if (!blob) return reject(new Error('Kunde inte skapa bild'));
+      resolve(blob);
+    }, "image/png");
+  });
+}
+
+async function generateSubmissionDocx() {
+  if (!btnGenerateDocx) return;
+
+  const originalText = btnGenerateDocx.textContent || '';
+  btnGenerateDocx.disabled = true;
+
+  try {
+    setSubmissionStatus('Skapar delningslänk...');
+    const shareUrl = await ensureShareLinkForDoc();
+
+    setSubmissionStatus('Skapar canvas-bild...');
+    const pngBlob = await canvasToWhitePngBlob();
+    const imgBuf = new Uint8Array(await pngBlob.arrayBuffer());
+
+    // Determine a sensible image size for Word (avoid huge images)
+    const maxWidthPx = 600;
+    let imgWidth = maxWidthPx;
+    let imgHeight = Math.round((pngBlob.size > 0 ? (canvas?.height || 1) : 1) * (imgWidth / (canvas?.width || 1)));
+    if (!isFinite(imgHeight) || imgHeight <= 0) imgHeight = 400;
+
+    // Keep height reasonable too
+    const maxHeightPx = 650;
+    if (imgHeight > maxHeightPx) {
+      const scale = maxHeightPx / imgHeight;
+      imgHeight = maxHeightPx;
+      imgWidth = Math.round(imgWidth * scale);
+    }
+
+    const assignmentName = (submissionAssignment?.value || '').trim();
+    const titleText = assignmentName ? `Inlämning: ${assignmentName}` : 'Inlämning';
+
+    setSubmissionStatus('Bygger Word-dokument...');
+    const codeText = codeEditor?.value ?? code;
+
+    const children: Paragraph[] = [];
+
+    // Title
+    children.push(
+      new Paragraph({
+        text: titleText,
+        heading: HeadingLevel.HEADING_1,
+      })
+    );
+
+    children.push(new Paragraph({ text: '' }));
+
+    // Share link paragraph (as hyperlink)
+    children.push(
+      new Paragraph({
+        children: [
+          new TextRun({ text: 'Delningslänk: ', bold: true }),
+          new ExternalHyperlink({
+            link: shareUrl,
+            children: [
+              new TextRun({
+                text: shareUrl,
+                style: "Hyperlink",
+              }),
+            ],
+          }),
+        ],
+      })
+    );
+
+    children.push(new Paragraph({ text: '' }));
+
+    // Canvas image
+    children.push(new Paragraph({ children: [new TextRun({ text: 'Canvas-bild:', bold: true })] }));
+    children.push(
+      new Paragraph({
+        alignment: AlignmentType.LEFT,
+        children: [
+          new ImageRun({
+            data: imgBuf,
+            transformation: {
+              width: imgWidth,
+              height: imgHeight,
+            },
+          }),
+        ],
+      })
+    );
+
+    children.push(new Paragraph({ text: '' }));
+
+    // Code block (monospace)
+    children.push(new Paragraph({ children: [new TextRun({ text: 'Kod:', bold: true })] }));
+
+    const lines = codeText.split('\n');
+    for (const line of lines) {
+      children.push(
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: line === '' ? ' ' : line,
+              font: 'Consolas',
+              size: 22, // ~11pt
+            }),
+          ],
+          spacing: { before: 0, after: 0 },
+        })
+      );
+    }
+
+    const doc = new Document({
+      sections: [
+        {
+          properties: {},
+          children,
+        },
+      ],
+    });
+
+    // Browser output
+    const docBlob = await Packer.toBlob(doc);
+
+    const safePart = sanitizeFilenamePart(assignmentName);
+    const filename = safePart ? `Inlamning - ${safePart}.docx` : 'Inlamning.docx';
+
+    setSubmissionStatus('Laddar ner...');
+    saveAs(docBlob, filename);
+
+    setSubmissionStatus('Klart! ✅');
+  } catch (e: any) {
+    console.error(e);
+    const msg = String(e?.message || '');
+    if (msg.includes('50KB')) {
+      setSubmissionStatus('Koden är för stor för att delas (max 50KB).');
+    } else {
+      setSubmissionStatus('Kunde inte skapa dokumentet. Försök igen.');
+    }
+  } finally {
+    btnGenerateDocx.disabled = false;
+    btnGenerateDocx.textContent = originalText;
   }
 }
 
