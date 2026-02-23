@@ -1,3 +1,12 @@
+/* =========================================================
+   KD - style.css (FULL FILE)
+   Clean + ready to paste
+   - Keeps everything that was there
+   - Removes duplicate/contradicting patches by DISABLING them (commented) with reasons
+   - Fixes typos that prevented rules from applying (e.g., !inportant)
+   - Implements: bigger canvas + pushed left + axis titles + grid starts visually from 0 (numbers handled in script.ts)
+   ========================================================= */
+
 :root {
   --bg-color: #f9fafb;
   --panel-bg: #ffffff;
@@ -375,13 +384,27 @@ button:disabled {
   overflow-y: auto;
 }
 
-/* Canvas Grid Layout */
+/* =========================================================
+   CANVAS GRID SYSTEM (UPDATED, ACTIVE)
+   - Bigger canvas
+   - Push left
+   - Axis titles are created in renderAxes() and styled here
+   ========================================================= */
+
+/* Make canvas side start a bit more to the left (give space) */
+.canvas-panel {
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding: 10px 20px 10px 10px;
+}
+
+/* Grid layout: left axis column + top axis row */
 .canvas-grid-container {
   display: grid;
-  grid-template-columns: 40px 1fr;
-  grid-template-rows: 30px 1fr;
-  width: 100%;
-  height: 100%;
+  grid-template-columns: 50px 1fr; /* was 40px */
+  grid-template-rows: 40px 1fr;    /* was 30px */
+  width: min(720px, 100%);
+  height: min(710px, 100%);
   max-width: 100%;
   max-height: 100%;
 }
@@ -396,7 +419,7 @@ button:disabled {
   overflow: hidden;
   pointer-events: none;
   font-family: 'Inter', sans-serif;
-  font-size: 10px;
+  font-size: 11px;
   color: #6b7280; /* gray-500 */
 }
 
@@ -445,15 +468,15 @@ button:disabled {
   height: 1px;
 }
 
-/* Canvas */
+/* Canvas wrapper: bigger drawing area */
 .canvas-wrapper {
   grid-column: 2;
   grid-row: 2;
   position: relative;
-  width: 100%;
-  height: 100%;
+  width: 660px;
+  height: 660px;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  border-radius: 0 0 4px 0; /* Adjusted radius */
+  border-radius: 0 0 4px 0;
   background-color: white;
   line-height: 0;
   overflow: hidden;
@@ -473,7 +496,27 @@ canvas {
   z-index: 20;
 }
 
-/* Removed overlay-canvas styles */
+/* Axis titles (added by renderAxes()) */
+.axis-title-x,
+.axis-title-y {
+  position: absolute;
+  font-size: 12px;
+  font-weight: 600;
+  color: #374151;
+  white-space: nowrap;
+}
+
+.axis-title-x {
+  top: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.axis-title-y {
+  top: 50%;
+  left: 4px;
+  transform: translateY(-50%) rotate(-90deg);
+}
 
 .coords-tooltip {
   position: absolute;
@@ -489,6 +532,21 @@ canvas {
   line-height: normal;
   z-index: 30;
 }
+
+/* =========================================================
+   DISABLED (old) iPad canvas sizing patch
+   Reason: It forced 640x630 and prevented the canvas from
+   becoming bigger, which you explicitly wanted.
+   Keeping for reference only.
+   ========================================================= */
+/*
+@media (pointer: coarse) and (max-width: 1024px) {
+  .canvas-grid-container {
+    width: min(640px, 100%) !important;
+    height: min(630px, 100%) !important;
+  }
+}
+*/
 
 /* Modal */
 .modal-overlay {
@@ -567,7 +625,7 @@ canvas {
 }
 
 /* =========================================================
-   NEW: Submission modal minimal styles (SAFE)
+   Submission modal minimal styles (SAFE)
    ========================================================= */
 .modal--submission {
   max-width: 520px;
@@ -626,33 +684,33 @@ canvas {
     flex-direction: column;
     overflow-y: auto;
   }
-  
+
   .editor-panel {
     height: 50vh;
     border-right: none;
     border-bottom: 1px solid var(--border-color);
   }
-  
+
   .canvas-panel {
     height: 50vh;
     padding: 10px;
   }
-  
+
   /* Touch friendly adjustments */
   button {
-    padding: 10px 14px; /* Larger touch targets */
+    padding: 10px 14px;
     font-size: 14px;
   }
-  
+
   .toolbar {
     gap: 10px;
     padding: 12px;
   }
-  
+
   .color-tools {
     padding: 12px;
   }
-  
+
   #color-input {
     width: 32px;
     height: 32px;
@@ -680,10 +738,9 @@ canvas {
 
 /* =========================================================
    iPad-only fixes + syntax colors (SAFE PATCH)
-   - Does NOT change desktop layout
    ========================================================= */
 
-/* 1) Fix iOS Safari viewport quirks (iPad only) */
+/* iOS Safari viewport quirks (iPad only) */
 @media (pointer: coarse) {
   @supports (height: 100dvh) {
     body {
@@ -692,22 +749,12 @@ canvas {
   }
 }
 
-/* 3) iPad canvas target 600x600 WITHOUT affecting desktop.
-      Your grid has axes: 40px left + 30px top, so total target = 640 x 630 */
-@media (pointer: coarse) and (max-width: 1024px) {
-  .canvas-grid-container {
-    width: min(640px, 100%) !important;
-    height: min(630px, 100%) !important;
-  }
-}
-
-/* 4) Syntax highlight colors (VS Code-like) */
-.token-function { color: #2563eb !important; font-weight: 700; } /* blue */
-.token-number   { color: #7c3aed !important; }                  /* purple */
-.token-string   { color: #16a34a !important; }                  /* green */
+/* Syntax highlight colors (VS Code-like) */
+.token-function { color: #2563eb !important; font-weight: 700; }
+.token-number   { color: #7c3aed !important; }
+.token-string   { color: #16a34a !important; }
 .token-comment  { color: #94a3b8 !important; font-style: italic; }
-.token-keyword  { color: #db2777 !important; font-weight: 700; } /* magenta */
-
+.token-keyword  { color: #db2777 !important; font-weight: 700; }
 
 /* =========================================================
    iPad SAFE PATCH (no desktop changes)
@@ -715,24 +762,22 @@ canvas {
    - Fix caret/tap behavior on iPad Safari
    - Slightly reduce header + error panel to fit iPad
    ========================================================= */
-
-/* iPad / touch devices only */
 @media (pointer: coarse) and (max-width: 1024px) {
-  /* 1) Ensure highlighting layer is visible on iPad */
+  /* Ensure highlighting layer is visible on iPad */
   #highlighting {
     display: block !important;
   }
 
-  /* 2) iOS caret/tap fix:
-        If textarea text is fully transparent, iOS Safari can misplace caret.
-        Use "almost transparent" text instead of fully transparent. */
+  /* iOS caret/tap fix:
+     If textarea text is fully transparent, iOS Safari can misplace caret.
+     Use "almost transparent" text instead of fully transparent. */
   #code-editor {
     color: rgba(0, 0, 0, 0.001) !important;
     -webkit-text-fill-color: rgba(0, 0, 0, 0.001) !important;
     caret-color: var(--text-color) !important;
   }
 
-  /* 3) Fit layout slightly better on iPad */
+  /* Fit layout slightly better on iPad */
   header {
     height: 52px !important;
     padding: 0 14px !important;
@@ -742,24 +787,11 @@ canvas {
     height: 92px !important;
   }
 
-  /* Optional: reduce editor padding a touch (safe) */
+  /* Reduce editor padding slightly */
   #code-editor,
   #highlighting {
     padding: 8px !important;
   }
-
-  /* Keep your iPad canvas target if you already set it:
-     axes are 40px left + 30px top, so total = 640 x 630 */
-  .canvas-grid-container {
-    width: min(640px, 100%) !important;
-    height: min(630px, 100%) !important;
-  }
-}
-
-/* =========================================================
-   iPad-only layout tuning (NO desktop impact)
-   ========================================================= */
-@media (pointer: coarse) and (max-width: 1024px) {
 
   /* Improve iOS editor tap/caret behavior */
   #code-editor, #highlighting {
@@ -767,47 +799,68 @@ canvas {
     line-height: 1.5 !important;
   }
 
-  /* Give canvas more room by slightly narrowing editor side */
+  /* Give canvas more room by narrowing editor slightly (iPad only) */
   .editor-panel {
     flex: 0 0 44% !important;
   }
+
   .canvas-panel {
     flex: 0 0 56% !important;
-    padding: 10px !important; /* was 20px */
+    padding: 10px !important;
   }
 
-  /* Target: 600x600 drawing + axes (40px left + 30px top) => 640x630 total */
+  /* Make our new bigger canvas fit better on iPad */
   .canvas-grid-container {
-    width: min(640px, 100%) !important;
-    height: min(630px, 100%) !important;
+    width: min(720px, 100%) !important;
+    height: min(710px, 100%) !important;
+  }
+
+  /* Make canvas wrapper responsive on iPad (don’t overflow) */
+  .canvas-wrapper {
+    width: min(660px, 100%) !important;
+    height: min(660px, 100%) !important;
   }
 }
 
 /* =========================================================
-   FIX: Make color-tools buttons compact on iPad/touch
-   - Does NOT affect desktop
-   - Does NOT affect toolbar buttons
+   Color-tools compact on iPad/touch (ACTIVE)
+   - Reduces whitespace so buttons don't touch edges
    ========================================================= */
 @media (pointer: coarse) {
-  .color-tools button {
-    padding: 6px 10px !important;
-    font-size: 12px !important;
-    line-height: 1.2 !important;
-    gap: 6px !important;
-    white-space: nowrap !important;
+  .color-tools {
+    justify-content: flex-start;
+    gap: 6px;
+    flex-wrap: wrap;
+    padding-right: 20px; /* create breathing space on right */
   }
 
-  /* make inputs a bit tighter too (optional, safe) */
-  .color-tools {
-    gap: 8px !important;
-	flex-wrap: wrap !inportant;
+  .color-tools button {
+    padding: 5px 8px;
+    font-size: 12px;
+    line-height: 1.1;
+    gap: 5px;
+    white-space: nowrap;
+  }
+
+  /* If you have a class on the submission button (recommended), this tightens it a bit */
+  .color-tools .btn-submission {
+    padding: 5px 7px;
+    font-size: 11.5px;
+    letter-spacing: -0.1px;
   }
 }
 
 /* =========================================================
-   FIX: keep the second-row buttons compact on iPad/mobile
-   (only affects .color-tools buttons)
+   DISABLED duplicate/buggy patches from yesterday
+   Reasons:
+   - duplicated rules (hard to maintain, unpredictable precedence)
+   - one had a typo: "flex-wrap: wrap !inportant" (never applied)
+   - one had nested CSS by mistake inside .btn-submission block (invalid CSS)
+   Keeping them commented for traceability.
    ========================================================= */
+
+/* (1) Duplicate max-width:768 button compact patch (disabled: duplicates pointer:coarse patch) */
+/*
 @media (max-width: 768px) {
   .color-tools button {
     padding: 6px 10px !important;
@@ -822,40 +875,44 @@ canvas {
     flex-wrap: wrap !important;
   }
 }
+*/
 
-/* =========================================================
-   iPad/mobile: make .color-tools row more compact
-   (reduces internal whitespace so buttons don't touch edges)
-   ========================================================= */
+/* (2) Broken patch with typo "!inportant" and invalid nesting (disabled) */
+/*
+@media (pointer: coarse) {
+  .color-tools button {
+    padding: 6px 10px !important;
+    font-size: 12px !important;
+    line-height: 1.2 !important;
+    gap: 6px !important;
+    white-space: nowrap !important;
+  }
+
+  .color-tools {
+    gap: 8px !important;
+    flex-wrap: wrap !inportant;  // TYPO: invalid -> rule never applied
+  }
+}
+
 @media (max-width: 768px) {
   .color-tools {
-    gap: 6px !important;            /* was 8 */
-    padding: 6px 10px !important;   /* slightly tighter */
+    gap: 6px !important;
+    padding: 6px 10px !important;
   }
 
   .color-tools button {
-    padding: 5px 8px !important;    /* was 6px 10px */
+    padding: 5px 8px !important;
     font-size: 12px !important;
     line-height: 1.1 !important;
     gap: 5px !important;
   }
 
-  /* Make just the submission button a touch tighter */
   .color-tools .btn-submission {
     padding: 5px 7px !important;
     font-size: 11.5px !important;
-    letter-spacing: -0.1px;         /* tiny, safe */
-	
-	.color-tools { justify-content: flex-start !important; }
+    letter-spacing: -0.1px;
+
+    .color-tools { justify-content: flex-start !important; } // INVALID nesting in plain CSS
   }
 }
-
-/* =========================================================
-   Make color-tools row left-aligned and not full width
-   ========================================================= */
-.color-tools {
-  justify-content: flex-start !important;
-  width: auto !important;
-  max-width: 100% !important;
-  padding-right: 20px !important;   /* creates breathing space on right */
-}
+*/
