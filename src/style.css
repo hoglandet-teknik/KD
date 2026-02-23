@@ -849,3 +849,13 @@ canvas {
 	.color-tools { justify-content: flex-start !important; }
   }
 }
+
+/* =========================================================
+   Make color-tools row left-aligned and not full width
+   ========================================================= */
+.color-tools {
+  justify-content: flex-start !important;
+  width: auto !important;
+  max-width: 100% !important;
+  padding-right: 20px !important;   /* creates breathing space on right */
+}
