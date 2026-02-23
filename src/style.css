@@ -138,7 +138,7 @@ main {
   display: flex;
   align-items: center;
   justify-content: center;
-  overflow: auto;
+  overflow: hidden;
   padding: 20px;
   position: relative;
 }
@@ -399,8 +399,8 @@ button:disabled {
   display: grid;
   grid-template-columns: 50px 1fr;
   grid-template-rows: 40px 1fr;
-  width: min(720px, 100%);
-  height: min(710px, 100%);
+   width: min(720px, calc(100vw - 40px));
+  height: min(710px, calc(100vh - 180px));
   max-width: 100%;
   max-height: 100%;
 }
@@ -476,8 +476,8 @@ button:disabled {
   grid-column: 2;
   grid-row: 2;
   position: relative;
-  width: 660px;
-  height: 660px;
+  width: min(660px, calc(100vw - 90px));
+  height: min(660px, calc(100vh - 220px));
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
   border-radius: 0 0 4px 0;
   background-color: white;
@@ -545,9 +545,9 @@ canvas {
 }
 
 .coords-tooltip {
-  position: absolute;
-  bottom: 10px;
-  right: 10px;
+  position: fixed;            /* ثابت على الشاشة */
+  right: 18px;
+  bottom: 18px;
   background-color: rgba(0, 0, 0, 0.7);
   color: white;
   padding: 4px 8px;
@@ -556,7 +556,7 @@ canvas {
   font-family: monospace;
   pointer-events: none;
   line-height: normal;
-  z-index: 30;
+  z-index: 3000;              /* فوق كل شيء */
 }
 
 /* =========================================================
