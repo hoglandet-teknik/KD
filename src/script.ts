@@ -894,54 +894,66 @@ function renderAxes() {
 
   const step = 50;
 
-  /* =========================
-     X AXIS (DO NOT TOUCH)
-     ========================= */
+  // =========================
+  // X labels + ticks
+  // =========================
   for (let x = 0; x <= width; x += step) {
+    // Label
     const label = document.createElement('div');
     label.className = 'axis-label x-label';
     label.style.left = `${x}px`;
     label.textContent = `${x}`;
+
+    // FIX: x=0 must not be centered (otherwise "0" is cut in half)
+    if (x === 0) {
+      label.classList.add('x-label-zero'); // CSS will remove translate
+    }
+
     xAxisContainer.appendChild(label);
 
-    const tick = document.createElement('div');
-    tick.className = 'axis-tick x-tick';
-    tick.style.left = `${x}px`;
-    xAxisContainer.appendChild(tick);
+    // Tick (skip ONLY the zero tick)
+    if (x !== 0) {
+      const tick = document.createElement('div');
+      tick.className = 'axis-tick x-tick';
+      tick.style.left = `${x}px`;
+      xAxisContainer.appendChild(tick);
+    }
   }
 
-  /* =========================
-     Y AXIS (FIXES)
-     1) Avoid duplicate "0" in corner:
-        Do NOT render y=0 label (X already shows 0).
-     ========================= */
+  // =========================
+  // Y labels + ticks
+  // =========================
   for (let y = 0; y <= height; y += step) {
+    // Label
     const label = document.createElement('div');
     label.className = 'axis-label y-label';
     label.style.top = `${y}px`;
 
-    // Avoid double "0" in the top-left corner
+    // OPTION A: single "0" in the corner -> hide y=0 label only
     label.textContent = (y === 0) ? '' : `${y}`;
 
     yAxisContainer.appendChild(label);
 
-    const tick = document.createElement('div');
-    tick.className = 'axis-tick y-tick';
-    tick.style.top = `${y}px`;
-    yAxisContainer.appendChild(tick);
+    // Tick (skip ONLY the zero tick)
+    if (y !== 0) {
+      const tick = document.createElement('div');
+      tick.className = 'axis-tick y-tick';
+      tick.style.top = `${y}px`;
+      yAxisContainer.appendChild(tick);
+    }
   }
 
-  /* =========================
-     X title (keep as-is)
-     ========================= */
+  // =========================
+  // X title (keep)
+  // =========================
   const xTitle = document.createElement('div');
   xTitle.className = 'axis-title-x';
   xTitle.textContent = 'X-Axis   ←   →';
   xAxisContainer.appendChild(xTitle);
 
-  /* =========================
-     Y title (fix arrows to up/down)
-     ========================= */
+  // =========================
+  // Y title (UP/DOWN arrows)
+  // =========================
   const yTitle = document.createElement('div');
   yTitle.className = 'axis-title-y';
   yTitle.textContent = 'Y-Axis   ↑   ↓';

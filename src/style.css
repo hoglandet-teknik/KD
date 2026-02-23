@@ -919,3 +919,36 @@ canvas {
   }
 }
 */
+
+/* =========================================================
+   AXIS FIXES
+   - prevent clipping of axis titles
+   - make x=0 label fully visible
+   ========================================================= */
+
+/* IMPORTANT: was overflow:hidden which clipped Y-Axis title when moved */
+.axis-container {
+  overflow: visible !important;
+}
+
+/* x-label at 0 should not be centered */
+.x-label-zero {
+  transform: none !important;   /* cancels translateX(-50%) */
+  left: 0px !important;
+  padding-left: 4px;            /* small breathing space */
+}
+
+/* Ensure Y title stays beside the Y axis, not clipped */
+.axis-title-y {
+  top: 50%;
+  left: 6px; /* inside the Y axis gutter, not over the grid */
+  transform: translateY(-50%) rotate(-90deg);
+  transform-origin: left center;
+  pointer-events: none;
+  z-index: 5;
+}
+
+/* X title stays centered */
+.axis-title-x {
+  z-index: 5;
+}
