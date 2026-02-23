@@ -23,6 +23,12 @@
   --line-num-bg: #f3f4f6;
   --line-num-text: #9ca3af;
   --selection-bg: #e0e7ff;
+    /* Responsive canvas size: auto scales with screen */
+  --axis-x-h: 40px;  /* top axis height */
+  --axis-y-w: 50px;  /* left axis width */
+
+  /* default (desktop/laptops): grows on large screens, shrinks on small */
+  --canvas-size: clamp(360px, 62vmin, 660px);
 }
 
 .dark {
@@ -44,12 +50,7 @@
   --selection-bg: #374151;
 }
 
-  /* Responsive canvas size: auto scales with screen */
-  --axis-x-h: 40px;  /* top axis height */
-  --axis-y-w: 50px;  /* left axis width */
 
-  /* default (desktop/laptops): grows on large screens, shrinks on small */
-  --canvas-size: clamp(360px, 62vmin, 660px);
 
 * {
   box-sizing: border-box;
@@ -406,8 +407,8 @@ button:disabled {
   display: grid;
   grid-template-columns: 50px 1fr;
   grid-template-rows: 40px 1fr;
-  width: var(--canvas-size);
-  height: var(--canvas-size);
+  width: calc(var(--axis-y-w) + var(--canvas-size));
+  height: calc(var(--axis-x-h) + var(--canvas-size));
   max-width: 100%;
   max-height: 100%;
 }
@@ -483,8 +484,8 @@ button:disabled {
   grid-column: 2;
   grid-row: 2;
   position: relative;
-  width: 550px;
-  height: 660px;
+  width: var(--canvas-size);
+  height: var(--canvas-size);
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
   border-radius: 0 0 4px 0;
   background-color: white;
@@ -573,12 +574,9 @@ canvas {
    ========================================================= */
 
 @media (pointer: coarse) and (max-width: 1024px) {
-  .canvas-grid-container {
-    width: min(640px, 100%) !important;
-    height: min(630px, 100%) !important;
-	:root { --canvas-size: clamp(320px, 78vmin, 640px); }
-  }
+  :root { --canvas-size: clamp(320px, 78vmin, 640px); }
 }
+
 
 
 /* Modal */
