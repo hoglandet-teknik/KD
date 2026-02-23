@@ -888,6 +888,16 @@ function renderAxes() {
   xAxisContainer.innerHTML = '';
   yAxisContainer.innerHTML = '';
 
+  // Put the single "0" in the CORNER (intersection)
+  const corner = document.querySelector('.axis-corner') as HTMLElement | null;
+  if (corner) {
+    corner.innerHTML = '';
+    const zero = document.createElement('div');
+    zero.className = 'corner-zero';
+    zero.textContent = '0';
+    corner.appendChild(zero);
+  }
+
   const rect = canvasWrapper.getBoundingClientRect();
   const width = Math.floor(rect.width);
   const height = Math.floor(rect.height);
@@ -898,20 +908,16 @@ function renderAxes() {
   // X labels + ticks
   // =========================
   for (let x = 0; x <= width; x += step) {
-    // Label
-    const label = document.createElement('div');
-    label.className = 'axis-label x-label';
-    label.style.left = `${x}px`;
-    label.textContent = `${x}`;
-
-    // FIX: x=0 must not be centered (otherwise "0" is cut in half)
-    if (x === 0) {
-      label.classList.add('x-label-zero'); // CSS will remove translate
+    // Skip ONLY x=0 label (0 is shown in corner)
+    if (x !== 0) {
+      const label = document.createElement('div');
+      label.className = 'axis-label x-label';
+      label.style.left = `${x}px`;
+      label.textContent = `${x}`;
+      xAxisContainer.appendChild(label);
     }
 
-    xAxisContainer.appendChild(label);
-
-    // Tick (skip ONLY the zero tick)
+    // Skip ONLY x=0 tick
     if (x !== 0) {
       const tick = document.createElement('div');
       tick.className = 'axis-tick x-tick';
@@ -924,17 +930,16 @@ function renderAxes() {
   // Y labels + ticks
   // =========================
   for (let y = 0; y <= height; y += step) {
-    // Label
-    const label = document.createElement('div');
-    label.className = 'axis-label y-label';
-    label.style.top = `${y}px`;
+    // Skip ONLY y=0 label (0 is shown in corner)
+    if (y !== 0) {
+      const label = document.createElement('div');
+      label.className = 'axis-label y-label';
+      label.style.top = `${y}px`;
+      label.textContent = `${y}`;
+      yAxisContainer.appendChild(label);
+    }
 
-    // OPTION A: single "0" in the corner -> hide y=0 label only
-    label.textContent = (y === 0) ? '' : `${y}`;
-
-    yAxisContainer.appendChild(label);
-
-    // Tick (skip ONLY the zero tick)
+    // Skip ONLY y=0 tick
     if (y !== 0) {
       const tick = document.createElement('div');
       tick.className = 'axis-tick y-tick';
@@ -943,20 +948,18 @@ function renderAxes() {
     }
   }
 
-  // =========================
-  // X title (keep)
-  // =========================
+  // X title (keep as-is)
   const xTitle = document.createElement('div');
   xTitle.className = 'axis-title-x';
-  xTitle.textContent = 'X-Axis   ←   →';
+  xTitle.textContent = 'X-Axeln   ←   →';
   xAxisContainer.appendChild(xTitle);
 
-  // =========================
-  // Y title (UP/DOWN arrows)
-  // =========================
+  // Y title:
+  // IMPORTANT: because we rotate the Y title in CSS (-90deg),
+  // writing "← →" will appear visually as "↑ ↓" after rotation.
   const yTitle = document.createElement('div');
   yTitle.className = 'axis-title-y';
-  yTitle.textContent = 'Y-Axis   ↑   ↓';
+  yTitle.textContent = 'Y-Axeln   ←   →';
   yAxisContainer.appendChild(yTitle);
 }
 

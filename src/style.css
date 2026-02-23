@@ -952,3 +952,18 @@ canvas {
 .axis-title-x {
   z-index: 5;
 }
+
+/* Single 0 in the corner (intersection of axes) */
+.axis-corner {
+  position: relative;
+}
+
+.corner-zero {
+  position: absolute;
+  right: 6px;     /* place near the intersection */
+  bottom: 4px;
+  font-size: 11px;
+  color: #6b7280;
+  font-family: 'Inter', sans-serif;
+  pointer-events: none;
+}
