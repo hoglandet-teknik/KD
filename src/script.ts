@@ -882,7 +882,6 @@ function toggleTheme() {
   localStorage.setItem('isDarkMode', String(isDarkMode));
 }
 
-// Axis rendering (unchanged)
 function renderAxes() {
   if (!canvasWrapper || !xAxisContainer || !yAxisContainer) return;
 
@@ -895,34 +894,35 @@ function renderAxes() {
 
   const step = 50;
 
-  /* =========================================================
-     1) X AXIS (START FROM 0)
-  ========================================================= */
-
+  /* =========================
+     X AXIS (DO NOT TOUCH)
+     ========================= */
   for (let x = 0; x <= width; x += step) {
-    // Label
     const label = document.createElement('div');
     label.className = 'axis-label x-label';
     label.style.left = `${x}px`;
-    label.textContent = `${x}`;   // 0 will now appear
+    label.textContent = `${x}`;
     xAxisContainer.appendChild(label);
 
-    // Tick
     const tick = document.createElement('div');
     tick.className = 'axis-tick x-tick';
     tick.style.left = `${x}px`;
     xAxisContainer.appendChild(tick);
   }
 
-  /* =========================================================
-     2) Y AXIS (START FROM 0)
-  ========================================================= */
-
+  /* =========================
+     Y AXIS (FIXES)
+     1) Avoid duplicate "0" in corner:
+        Do NOT render y=0 label (X already shows 0).
+     ========================= */
   for (let y = 0; y <= height; y += step) {
     const label = document.createElement('div');
     label.className = 'axis-label y-label';
     label.style.top = `${y}px`;
-    label.textContent = `${y}`;   // 0 will now appear
+
+    // Avoid double "0" in the top-left corner
+    label.textContent = (y === 0) ? '' : `${y}`;
+
     yAxisContainer.appendChild(label);
 
     const tick = document.createElement('div');
@@ -931,21 +931,17 @@ function renderAxes() {
     yAxisContainer.appendChild(tick);
   }
 
-  /* =========================================================
-     3) X-AXIS TITLE WITH ARROWS
-     Positioned centered above axis
-  ========================================================= */
-
+  /* =========================
+     X title (keep as-is)
+     ========================= */
   const xTitle = document.createElement('div');
   xTitle.className = 'axis-title-x';
   xTitle.textContent = 'X-Axis   ←   →';
   xAxisContainer.appendChild(xTitle);
 
-  /* =========================================================
-     4) Y-AXIS TITLE WITH ARROWS
-     Rotated and centered
-  ========================================================= */
-
+  /* =========================
+     Y title (fix arrows to up/down)
+     ========================= */
   const yTitle = document.createElement('div');
   yTitle.className = 'axis-title-y';
   yTitle.textContent = 'Y-Axis   ↑   ↓';

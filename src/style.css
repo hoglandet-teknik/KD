@@ -514,8 +514,11 @@ canvas {
 
 .axis-title-y {
   top: 50%;
-  left: 4px;
+  left: -6px;                 /* push it OUTSIDE the axis line */
   transform: translateY(-50%) rotate(-90deg);
+  transform-origin: left center;
+  background: transparent;
+  pointer-events: none;
 }
 
 .coords-tooltip {
