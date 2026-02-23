@@ -407,6 +407,7 @@ function handleInput() {
   const newCode = codeEditor.value;
   if (newCode !== code) {
     code = newCode;
+	saveToHistory(newCode);
     activeErrorLine = -1;
     updateHighlighting(code);
     updateLineNumbers();
