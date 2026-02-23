@@ -8,7 +8,7 @@ export default defineConfig(({ mode }) => {
 
   return {
     // مهم لـ GitHub Pages: اسم الريبو هو KD
-    base: '/KD/',
+    base: '/kd/',
 
     plugins: [react(), tailwindcss()],
     define: {
