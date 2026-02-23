@@ -1041,21 +1041,13 @@ async function generateSubmissionDocx() {
 
     // Share link paragraph (as hyperlink)
     children.push(
-      new Paragraph({
-        children: [
-          new TextRun({ text: 'Delningslänk: ', bold: true }),
-          new ExternalHyperlink({
-            link: shareUrl,
-            children: [
-              new TextRun({
-                text: shareUrl,
-                style: "Hyperlink",
-              }),
-            ],
-          }),
-        ],
-      })
-    );
+		new Paragraph({
+			children: [
+				new TextRun({ text: 'Delningslänk: ', bold: true }),
+				new TextRun({ text: shareUrl, font: 'Consolas' }),
+			],
+		})
+	);
 
     children.push(new Paragraph({ text: '' }));
 

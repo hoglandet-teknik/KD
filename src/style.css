@@ -782,3 +782,23 @@ canvas {
     height: min(630px, 100%) !important;
   }
 }
+
+/* =========================================================
+   FIX: Make color-tools buttons compact on iPad/touch
+   - Does NOT affect desktop
+   - Does NOT affect toolbar buttons
+   ========================================================= */
+@media (pointer: coarse) and (max-width: 1024px) {
+  .color-tools button {
+    padding: 6px 10px !important;
+    font-size: 12px !important;
+    line-height: 1.2 !important;
+    gap: 6px !important;
+    white-space: nowrap !important;
+  }
+
+  /* make inputs a bit tighter too (optional, safe) */
+  .color-tools {
+    gap: 8px !important;
+  }
+}
