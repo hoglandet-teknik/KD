@@ -1058,11 +1058,12 @@ async function generateSubmissionDocx() {
         alignment: AlignmentType.LEFT,
         children: [
           new ImageRun({
-            data: imgBuf,
-            transformation: {
-              width: imgWidth,
-              height: imgHeight,
-            },
+			  type: "png",
+			  data: imgBuf,
+              transformation: {
+               width: imgWidth,
+               height: imgHeight,
+             },
           }),
         ],
       })

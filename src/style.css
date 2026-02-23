@@ -788,7 +788,7 @@ canvas {
    - Does NOT affect desktop
    - Does NOT affect toolbar buttons
    ========================================================= */
-@media (pointer: coarse) and (max-width: 1024px) {
+@media (pointer: coarse) {
   .color-tools button {
     padding: 6px 10px !important;
     font-size: 12px !important;
@@ -800,5 +800,25 @@ canvas {
   /* make inputs a bit tighter too (optional, safe) */
   .color-tools {
     gap: 8px !important;
+	flex-wrap: wrap !inportant;
+  }
+}
+
+/* =========================================================
+   FIX: keep the second-row buttons compact on iPad/mobile
+   (only affects .color-tools buttons)
+   ========================================================= */
+@media (max-width: 768px) {
+  .color-tools button {
+    padding: 6px 10px !important;
+    font-size: 12px !important;
+    line-height: 1.2 !important;
+    gap: 6px !important;
+    white-space: nowrap !important;
+  }
+
+  .color-tools {
+    gap: 8px !important;
+    flex-wrap: wrap !important;
   }
 }
